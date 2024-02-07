@@ -13,12 +13,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.aliucord.gradle.configuration
+package com.flixclusive.gradle.configuration
 
 import org.gradle.api.Project
 
 fun registerConfigurations(project: Project) {
-    val providers = arrayOf(DiscordConfigurationProvider())
+    val providers = arrayOf(FlixclusiveConfigurationProvider())
 
     for (provider in providers) {
         project.configurations.register(provider.name) {

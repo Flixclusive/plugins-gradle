@@ -13,12 +13,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.aliucord.gradle.entities
+package com.flixclusive.gradle
 
-data class UpdateInfo(
-    var minimumDiscordVersion: Int? = null,
-    var version: String? = null,
-    var build: String? = null,
-    var changelog: String? = null,
-    var changelogMedia: String? = null
-)
+import com.flixclusive.gradle.configuration.registerConfigurations
+import com.flixclusive.gradle.task.registerTasks
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+
+abstract class FlixclusivePlugin : Plugin<Project> {
+    override fun apply(project: Project) {
+        project.extensions.create("flixclusive", FlixclusiveExtension::class.java, project)
+
+        registerTasks(project)
+        registerConfigurations(project)
+    }
+}

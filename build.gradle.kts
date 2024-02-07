@@ -1,10 +1,10 @@
 plugins {
-    kotlin("jvm") version "1.7.20"
+    kotlin("jvm") version "1.9.10"
     id("java-gradle-plugin")
     id("maven-publish")
 }
 
-group = "com.aliucord"
+group = "com.flixclusive"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -15,7 +15,6 @@ repositories {
     mavenCentral()
     google()
     maven("https://jitpack.io")
-    maven("https://maven.aliucord.com/snapshots")
 }
 
 dependencies {
@@ -24,38 +23,39 @@ dependencies {
 
     compileOnly("com.google.guava:guava:30.1.1-jre")
     compileOnly("com.android.tools:sdk-common:31.0.0")
-    compileOnly("com.android.tools.build:gradle:7.0.4")
+    compileOnly("com.android.tools.build:gradle:7.2.2")
 
-    implementation("com.github.Aliucord.dex2jar:dex-translator:808b91d679")
-    implementation("com.aliucord.jadx:jadx-core:1.4.5-SNAPSHOT")
-    implementation("com.aliucord.jadx:jadx-dex-input:1.4.5-SNAPSHOT")
-    implementation("com.aliucord:jadb:1.2.1-SNAPSHOT")
+    implementation("org.ow2.asm:asm:9.4")
+    implementation("org.ow2.asm:asm-tree:9.4")
+    implementation("com.github.vidstige:jadb:master-SNAPSHOT")
+    implementation("com.github.Flixclusive.dex2jar:dex-translator:main-SNAPSHOT")
+    implementation("io.github.skylot:jadx-core:1.4.7")
+    implementation("io.github.skylot:jadx-dex-input:1.4.7")
 }
 
 gradlePlugin {
     plugins {
-        create("com.aliucord.gradle") {
-            id = "com.aliucord.gradle"
-            implementationClass = "com.aliucord.gradle.AliucordPlugin"
+        create("com.flixclusive.gradle") {
+            id = "com.flixclusive.gradle"
+            implementationClass = "com.flixclusive.gradle.FlixclusivePlugin"
         }
     }
 }
 
 publishing {
     repositories {
-        val username = System.getenv("MAVEN_USERNAME")
-        val password = System.getenv("MAVEN_PASSWORD")
+        mavenLocal()
 
-        if (username != null && password != null) {
+        val token = System.getenv("GITHUB_TOKEN")
+
+        if (token != null) {
             maven {
                 credentials {
-                    this.username = username
-                    this.password = password
+                    username = "Flixclusive"
+                    password = token
                 }
-                setUrl("https://maven.aliucord.com/snapshots")
+                setUrl("https://maven.pkg.github.com/Flixclusive/gradle")
             }
-        } else {
-            mavenLocal()
         }
     }
 }

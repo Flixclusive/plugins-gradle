@@ -13,9 +13,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.aliucord.gradle.task
+package com.flixclusive.gradle.task
 
-import com.aliucord.gradle.getAliucord
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.errors.MessageReceiverImpl
 import com.android.build.gradle.options.SyncOptions.ErrorFormatMode
@@ -23,6 +22,7 @@ import com.android.builder.dexing.ClassFileInputs
 import com.android.builder.dexing.DexArchiveBuilder
 import com.android.builder.dexing.DexParameters
 import com.android.builder.dexing.r8.ClassFileProviderFactory
+import com.flixclusive.gradle.getFlixclusive
 import com.google.common.io.Closer
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
@@ -53,15 +53,17 @@ abstract class CompileDexTask : DefaultTask() {
     fun compileDex() {
         val android = project.extensions.getByName("android") as BaseExtension
 
+        val minSdk = android.defaultConfig.minSdk ?: 21
+
         val dexOutputDir = outputFile.get().asFile.parentFile
 
         Closer.create().use { closer ->
             val dexBuilder = DexArchiveBuilder.createD8DexBuilder(
                 DexParameters(
-                    minSdkVersion = android.defaultConfig.minSdkVersion?.apiLevel ?: 24,
+                    minSdkVersion = minSdk,
                     debuggable = true,
                     dexPerClass = false,
-                    withDesugaring = true,
+                    withDesugaring = minSdk >= 24,
                     desugarBootclasspath = ClassFileProviderFactory(android.bootClasspath.map(File::toPath))
                         .also { closer.register(it) },
                     desugarClasspath = ClassFileProviderFactory(listOf<Path>()).also { closer.register(it) },
@@ -94,20 +96,20 @@ abstract class CompileDexTask : DefaultTask() {
                         reader.accept(classNode, 0)
 
                         for (annotation in classNode.visibleAnnotations.orEmpty() + classNode.invisibleAnnotations.orEmpty()) {
-                            if (annotation.desc == "Lcom/aliucord/annotations/AliucordPlugin;") {
-                                val aliucord = project.extensions.getAliucord()
+                            if (annotation.desc == "Lcom/flixclusive/annotations/FlixclusivePlugin;") {
+                                val flixclusive = project.extensions.getFlixclusive()
 
-                                require(aliucord.pluginClassName == null) {
+                                require(flixclusive.pluginClassName == null) {
                                     "Only 1 active plugin class per project is supported"
                                 }
 
                                 for (method in classNode.methods) {
-                                    if (method.name == "getManifest" && method.desc == "()Lcom/aliucord/entities/Plugin\$Manifest;") {
+                                    if (method.name == "getManifest" && method.desc == "()Lcom/flixclusive/entities/Plugin\$Manifest;") {
                                         throw IllegalArgumentException("Plugin class cannot override getManifest, use manifest.json system!")
                                     }
                                 }
 
-                                aliucord.pluginClassName = classNode.name.replace('/', '.')
+                                flixclusive.pluginClassName = classNode.name.replace('/', '.')
                                     .also { pluginClassFile.asFile.orNull?.writeText(it) }
                             }
                         }

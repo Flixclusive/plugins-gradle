@@ -13,10 +13,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.aliucord.gradle
+package com.flixclusive.gradle.configuration
 
-enum class ProjectType {
-    PLUGIN,
-    CORE,
-    INJECTOR
+import org.gradle.api.Project
+import org.gradle.api.artifacts.Dependency
+
+interface IConfigurationProvider {
+    val name: String
+
+    fun provide(project: Project, dependency: Dependency)
 }

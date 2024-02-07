@@ -13,7 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.aliucord.gradle.task
+package com.flixclusive.gradle.task
 
 import com.android.build.gradle.BaseExtension
 import org.gradle.api.file.DirectoryProperty

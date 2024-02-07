@@ -13,7 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.aliucord.gradle
+package com.flixclusive.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.internal.project.ProjectInternal
@@ -54,7 +54,7 @@ fun URL.download(file: File, progressLogger: ProgressLogger) {
                     while (inputStream.read(buf).also { read = it } >= 0) {
                         os.write(buf, 0, read)
                         processedBytes += read
-                        progressLogger.progress("Downloading discord apk ${toLengthText(processedBytes)}/$sizeText")
+                        progressLogger.progress("Downloading apk ${toLengthText(processedBytes)}/$sizeText")
                     }
                     os.flush()
                     finished = true

@@ -13,16 +13,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.aliucord.gradle.task
+package com.flixclusive.gradle.task
 
-import com.aliucord.gradle.entities.UpdateInfo
-import com.aliucord.gradle.findAliucord
+import com.flixclusive.gradle.entities.PluginData
+import com.flixclusive.gradle.getFlixclusive
+import com.flixclusive.gradle.util.createPluginData
 import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import java.util.LinkedList
 
 abstract class GenerateUpdaterJsonTask : DefaultTask() {
     @get:OutputFile
@@ -30,32 +32,27 @@ abstract class GenerateUpdaterJsonTask : DefaultTask() {
 
     @TaskAction
     fun generateUpdaterJson() {
-        val map = HashMap<String, UpdateInfo>()
+        val list = LinkedList<PluginData>()
 
         for (subproject in project.allprojects) {
-            val aliucord = subproject.extensions.findAliucord() ?: continue
+            val flixclusive = subproject.extensions.getFlixclusive()
 
-            if (aliucord.excludeFromUpdaterJson.get()) {
+            if (flixclusive.excludeFromUpdaterJson.get()) {
                 continue
             }
 
-            map[subproject.name] = UpdateInfo(
-                aliucord.minimumDiscordVersion.orNull ?: aliucord.discord?.version,
-                subproject.version.toString(),
-                aliucord.buildUrl.orNull,
-                aliucord.changelog.orNull,
-                aliucord.changelogMedia.orNull
-            )
+            list += subproject.createPluginData()
         }
 
-        // TODO figure out a way to use default in updater.json
         outputFile.asFile.get().writeText(
             JsonBuilder(
-                map,
-                JsonGenerator.Options()
+                /* content = */ list,
+                /* generator = */ JsonGenerator.Options()
                     .excludeNulls()
                     .build()
-            ).toString()
+            ).toPrettyString()
         )
+
+        logger.lifecycle("Created ${outputFile.asFile.get()}")
     }
 }

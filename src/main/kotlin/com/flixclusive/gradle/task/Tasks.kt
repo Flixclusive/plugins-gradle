@@ -13,24 +13,23 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.aliucord.gradle.task
+package com.flixclusive.gradle.task
 
-import com.aliucord.gradle.ProjectType
-import com.aliucord.gradle.entities.PluginManifest
-import com.aliucord.gradle.getAliucord
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessLibraryManifest
+import com.flixclusive.gradle.getFlixclusive
+import com.flixclusive.gradle.util.createPluginManifest
 import groovy.json.JsonBuilder
+import groovy.json.JsonGenerator
 import org.gradle.api.Project
 import org.gradle.api.tasks.AbstractCopyTask
-import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 
 const val TASK_GROUP = "aliucord"
 
 fun registerTasks(project: Project) {
-    val extension = project.extensions.getAliucord()
+    val extension = project.extensions.getFlixclusive()
     val intermediates = project.buildDir.resolve("intermediates")
 
     if (project.rootProject.tasks.findByName("generateUpdaterJson") == null) {
@@ -91,75 +90,59 @@ fun registerTasks(project: Project) {
     }
 
     project.afterEvaluate {
-        project.tasks.register(
-            "make",
-            if (extension.projectType.get() == ProjectType.INJECTOR) Copy::class.java else Zip::class.java
-        )
-        {
+        project.tasks.register("make", Zip::class.java) {
             it.group = TASK_GROUP
             val compileDexTask = compileDex.get()
             it.dependsOn(compileDexTask)
 
-            if (extension.projectType.get() == ProjectType.PLUGIN) {
-                val manifestFile = intermediates.resolve("manifest.json")
+            val manifestFile = intermediates.resolve("manifest.json")
 
-                it.from(manifestFile)
-                it.doFirst {
-                    require(project.version != "unspecified") {
-                        "No version is set"
-                    }
-
-                    if (extension.pluginClassName == null) {
-                        if (pluginClassFile.exists()) {
-                            extension.pluginClassName = pluginClassFile.readText()
-                        }
-                    }
-
-                    require(extension.pluginClassName != null) {
-                        "No plugin class found, make sure your plugin class is annotated with @AliucordPlugin"
-                    }
-
-                    manifestFile.writeText(
-                        JsonBuilder(
-                            PluginManifest(
-                                pluginClassName = extension.pluginClassName!!,
-                                name = project.name,
-                                version = project.version.toString(),
-                                description = project.description,
-                                authors = extension.authors.get(),
-                                links = extension.links,
-                                updateUrl = extension.updateUrl.orNull,
-                                changelog = extension.changelog.orNull,
-                                changelogMedia = extension.changelogMedia.orNull
-                            )
-                        ).toPrettyString()
-                    )
+            it.from(manifestFile)
+            it.doFirst {
+                require(project.version != "unspecified") {
+                    "No version is set"
                 }
+
+                if (extension.pluginClassName == null) {
+                    if (pluginClassFile.exists()) {
+                        extension.pluginClassName = pluginClassFile.readText()
+                    }
+                }
+
+                require(extension.pluginClassName != null) {
+                    "No plugin class found, make sure your plugin class is annotated with @FlixclusivePlugin"
+                }
+
+                manifestFile.writeText(
+                    JsonBuilder(
+                        project.createPluginManifest(),
+                        JsonGenerator.Options()
+                            .excludeNulls()
+                            .build()
+                    ).toPrettyString()
+                )
             }
 
             it.from(compileDexTask.outputFile)
 
-            if (extension.projectType.get() == ProjectType.INJECTOR) {
-                it.into(project.buildDir)
-                it.rename { return@rename "Injector.dex" }
-
-                it.doLast { task ->
-                    task.logger.lifecycle("Copied Injector.dex to ${project.buildDir}")
-                }
-            } else {
-                val zip = it as Zip
-
+            val zip = it as Zip
+            if (extension.requiresResources) {
                 zip.dependsOn(compileResources.get())
-                zip.isPreserveFileTimestamps = false
-                zip.archiveBaseName.set(project.name)
-                zip.archiveVersion.set("")
-                zip.destinationDirectory.set(project.buildDir)
+            }
 
-                it.doLast { task ->
-                    task.logger.lifecycle("Made Aliucord package at ${task.outputs.files.singleFile}")
-                }
+            zip.isPreserveFileTimestamps = false
+            zip.archiveBaseName.set(project.name)
+            zip.archiveExtension.set("flx")
+            zip.archiveVersion.set("")
+            zip.destinationDirectory.set(project.buildDir)
+
+            it.doLast { task ->
+                task.logger.lifecycle("Made Flixclusive package at ${task.outputs.files.singleFile}")
             }
         }
+
+        project.rootProject.tasks.getByName("generateUpdaterJson")
+            .dependsOn("make")
 
         project.tasks.register("deployWithAdb", DeployWithAdbTask::class.java) {
             it.group = TASK_GROUP

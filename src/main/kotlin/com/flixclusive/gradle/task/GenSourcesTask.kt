@@ -13,9 +13,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.aliucord.gradle.task
+package com.flixclusive.gradle.task
 
-import com.aliucord.gradle.getAliucord
+import com.flixclusive.gradle.getFlixclusive
 import jadx.api.JadxArgs
 import jadx.api.JadxDecompiler
 import jadx.api.impl.NoOpCodeCache
@@ -28,19 +28,18 @@ import java.util.function.Function
 abstract class GenSourcesTask : DefaultTask() {
     @TaskAction
     fun genSources() {
-        val extension = project.extensions.getAliucord()
-        val discord = extension.discord!!
+        val extension = project.extensions.getFlixclusive()
+        val flixclusive = extension.flixclusive!!
 
-        val sourcesJarFile = discord.cache.resolve("discord-${discord.version}-sources.jar")
+        val sourcesJarFile = flixclusive.cache.resolve("flixclusive-sources.jar")
 
         val args = JadxArgs()
-        args.setInputFile(discord.apkFile)
+        args.setInputFile(flixclusive.apkFile)
         args.outDirSrc = sourcesJarFile
         args.isSkipResources = true
         args.isShowInconsistentCode = true
         args.isRespectBytecodeAccModifiers = true
         args.isFsCaseSensitive = true
-        args.isGenerateKotlinMetadata = false
         args.isDebugInfo = false
         args.isInlineAnonymousClasses = false
         args.isInlineMethods = false

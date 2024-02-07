@@ -13,10 +13,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.aliucord.gradle.task
+package com.flixclusive.gradle.task
 
-import com.aliucord.gradle.ProjectType
-import com.aliucord.gradle.getAliucord
 import com.android.build.gradle.BaseExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.AbstractCopyTask
@@ -33,7 +31,6 @@ abstract class DeployWithAdbTask : DefaultTask() {
 
     @TaskAction
     fun deployWithAdb() {
-        val extension = project.extensions.getAliucord()
         val android = project.extensions.getByName("android") as BaseExtension
 
         AdbServerLauncher(Subprocess(), android.adbExecutable.absolutePath).launch()
@@ -54,34 +51,24 @@ abstract class DeployWithAdbTask : DefaultTask() {
 
         val make = project.tasks.getByName("make") as AbstractCopyTask
 
-        var file = make.outputs.files.singleFile
+        val file = make.outputs.files.singleFile
 
-        if (extension.projectType.get() == ProjectType.INJECTOR) {
-            file = file.resolve("Injector.dex")
-        }
-
-        var path = "/storage/emulated/0/Aliucord/"
-
-        if (extension.projectType.get() == ProjectType.PLUGIN) {
-            path += "plugins/"
-        }
+        val path = "/storage/emulated/0/Flixclusive/plugins"
 
         device.push(file, RemoteFile(path + file.name))
 
-        if (extension.projectType.get() != ProjectType.INJECTOR) {
-            val args = arrayListOf("start", "-S", "-n", "com.aliucord/com.discord.app.AppActivity\$Main")
+        val args = arrayListOf("start", "-S", "-n", "com.flixclusive.mobile/com.flixclusive.mobile.MobileActivity")
 
-            if (waitForDebugger) {
-                args.add("-D")
-            }
+        if (waitForDebugger) {
+            args.add("-D")
+        }
 
-            val response = String(
-                device.executeShell("am", *args.toTypedArray()).readAllBytes(), StandardCharsets.UTF_8
-            )
+        val response = String(
+            device.executeShell("am", *args.toTypedArray()).readAllBytes(), StandardCharsets.UTF_8
+        )
 
-            if (response.contains("Error")) {
-                logger.error(response)
-            }
+        if (response.contains("Error")) {
+            logger.error(response)
         }
 
         logger.lifecycle("Deployed $file to ${device.serial}")

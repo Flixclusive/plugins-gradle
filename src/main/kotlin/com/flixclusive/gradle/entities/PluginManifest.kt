@@ -13,47 +13,34 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.aliucord.gradle.entities
+package com.flixclusive.gradle.entities
 
+/**
+ * Represents an author entity with associated information such as name, user link, and Discord ID.
+ *
+ * @property name The name of the author.
+ * @property userLink The optional link associated with the author's profile.
+ * @property discordId The optional Discord ID of the author.
+ */
 data class Author(
     val name: String,
-    val id: Long,
+    val userLink: String? = null,
+    val discordId: Long? = null,
 )
 
-class Links : HashMap<String?, String?>() {
-    companion object {
-        var GITHUB = "github"
-        var SOURCE = "source"
-    }
-
-    var github: String?
-        get() = get(GITHUB)
-        set(value) {
-            put(GITHUB, value)
-        }
-
-    var source: String?
-        get() {
-            if (containsKey(GITHUB)) {
-                return github
-            }
-
-            return get(SOURCE)
-        }
-        set(value) {
-            put(SOURCE, value)
-        }
-}
-
+/**
+ * Represents the manifest information of a plugin.
+ *
+ * @property pluginClassName The fully qualified class name of the plugin.
+ * @property name The name of the plugin.
+ * @property version The version of the plugin.
+ * @property requiresResources Indicates whether the plugin requires resources from the main application/apk.
+ */
 data class PluginManifest(
     val pluginClassName: String,
     val name: String,
     val version: String,
-    val description: String?,
-    val authors: List<Author>,
-    val links: Links,
-
+    val requiresResources: Boolean,
     val updateUrl: String?,
-    val changelog: String?,
-    val changelogMedia: String?
 )
+
