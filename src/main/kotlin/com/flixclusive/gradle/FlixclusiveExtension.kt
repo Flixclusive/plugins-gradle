@@ -100,7 +100,6 @@ class FlixclusiveInfo(extension: FlixclusiveExtension, version: String) {
 
     val urlPrefix =
         "https://github.com/rhenwinch/Flixclusive/releases/download/${version}"
-    val apkFile = cache.resolve("flixclusive.apk")
     val jarFile = cache.resolve("flixclusive.jar")
 }
 

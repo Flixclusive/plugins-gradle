@@ -15,15 +15,12 @@
 
 package com.flixclusive.gradle.task
 
+import com.flixclusive.gradle.createProgressLogger
+import com.flixclusive.gradle.download
 import com.flixclusive.gradle.getFlixclusive
-import jadx.api.JadxArgs
-import jadx.api.JadxDecompiler
-import jadx.api.impl.NoOpCodeCache
-import jadx.api.impl.SimpleCodeWriter
-import jadx.plugins.input.dex.DexInputPlugin
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-import java.util.function.Function
+import java.net.URL
 
 abstract class GenSourcesTask : DefaultTask() {
     @TaskAction
@@ -33,25 +30,9 @@ abstract class GenSourcesTask : DefaultTask() {
 
         val sourcesJarFile = flixclusive.cache.resolve("flixclusive-sources.jar")
 
-        val args = JadxArgs()
-        args.setInputFile(flixclusive.apkFile)
-        args.outDirSrc = sourcesJarFile
-        args.isSkipResources = true
-        args.isShowInconsistentCode = true
-        args.isRespectBytecodeAccModifiers = true
-        args.isFsCaseSensitive = true
-        args.isDebugInfo = false
-        args.isInlineAnonymousClasses = false
-        args.isInlineMethods = false
-        args.isReplaceConsts = false
 
-        args.codeCache = NoOpCodeCache()
-        args.codeWriterProvider = Function { SimpleCodeWriter(it) }
+        val url = URL("${flixclusive.urlPrefix}/app-sources.jar")
 
-        JadxDecompiler(args).use { decompiler ->
-            decompiler.registerPlugin(DexInputPlugin())
-            decompiler.load()
-            decompiler.save()
-        }
+        url.download(sourcesJarFile, createProgressLogger(project, "Download app sources"))
     }
 }

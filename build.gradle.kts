@@ -28,9 +28,6 @@ dependencies {
     implementation("org.ow2.asm:asm:9.4")
     implementation("org.ow2.asm:asm-tree:9.4")
     implementation("com.github.vidstige:jadb:master-SNAPSHOT")
-    implementation("com.github.Flixclusive.dex2jar:dex-translator:main-SNAPSHOT")
-    implementation("io.github.skylot:jadx-core:1.4.7")
-    implementation("io.github.skylot:jadx-dex-input:1.4.7")
 }
 
 gradlePlugin {

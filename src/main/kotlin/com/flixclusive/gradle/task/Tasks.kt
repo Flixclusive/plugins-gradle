@@ -148,5 +148,9 @@ fun registerTasks(project: Project) {
             it.group = TASK_GROUP
             it.dependsOn("make")
         }
+
+        project.tasks.register("cleanCache", CleanCacheTask::class.java) {
+            it.group = TASK_GROUP
+        }
     }
 }
