@@ -30,9 +30,8 @@ abstract class GenSourcesTask : DefaultTask() {
 
         val sourcesJarFile = flixclusive.cache.resolve("flixclusive-sources.jar")
 
+        val url = URL("${flixclusive.urlPrefix}/fat-sources.jar")
 
-        val url = URL("${flixclusive.urlPrefix}/app-sources.jar")
-
-        url.download(sourcesJarFile, createProgressLogger(project, "Download app sources"))
+        url.download(sourcesJarFile, createProgressLogger(project, "Download fat sources"))
     }
 }
