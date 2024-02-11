@@ -33,6 +33,11 @@ abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
      * */
     val authors: ListProperty<Author> = project.objects.listProperty(Author::class.java)
 
+    /**
+     * 
+     * If you're changing the `builds` branch, you might as well change
+     * your github actions for generating compiled plugins.
+     * */
     var buildBranch = "builds"
 
     val repositoryUrl: Property<String> = project.objects.property(String::class.java)
@@ -51,8 +56,10 @@ abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
     val iconUrl: Property<String> = project.objects.property(String::class.java)
     val language: Property<Language> = project.objects.property(Language::class.java)
     val pluginType: Property<PluginType> = project.objects.property(PluginType::class.java)
-    val requiresResources = false
-    val status: Status = Status.Beta
+    val requiresResources: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .convention(false)
+    val status: Property<Status> = project.objects.property(Status::class.java)
+        .convention(Status.Beta)
 
     /**
      *

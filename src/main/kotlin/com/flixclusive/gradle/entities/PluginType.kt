@@ -15,13 +15,13 @@ sealed class PluginType(
     val customType: String? = null
 ) {
     /** Represents a plugin type that includes all types of plugins. */
-    data object All : PluginType()
+    object All : PluginType()
 
     /** Represents a plugin type specifically for movies. */
-    data object Movies : PluginType()
+    object Movies : PluginType()
 
     /** Represents a plugin type specifically for TV shows. */
-    data object TvShows : PluginType()
+    object TvShows : PluginType()
 
     /**
      * Represents a custom plugin type defined by the user.

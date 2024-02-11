@@ -22,7 +22,6 @@ import com.flixclusive.gradle.getFlixclusive
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import java.net.URL
-import java.nio.file.Files
 
 class FlixclusiveConfigurationProvider : IConfigurationProvider {
 
@@ -45,6 +44,7 @@ class FlixclusiveConfigurationProvider : IConfigurationProvider {
             }
 
             dependencies.add("compileOnly", files(flixclusive.jarFile))
+            dependencies.add("testImplementation", files(flixclusive.jarFile))
         }
     }
 }

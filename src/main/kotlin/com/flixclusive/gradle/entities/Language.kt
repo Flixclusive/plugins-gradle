@@ -12,7 +12,7 @@ sealed class Language(val languageCode: String? = null) {
     /**
      * Represents a plugin with multiple languages.
      */
-    data object Multiple : Language()
+    object Multiple : Language()
 
     /**
      * Represents a plugin with a specific language.

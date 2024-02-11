@@ -25,6 +25,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 const val TASK_GROUP = "aliucord"
 
@@ -53,12 +54,17 @@ fun registerTasks(project: Project) {
 
         it.pluginClassFile.set(pluginClassFile)
 
-        for (name in arrayOf("compileDebugJavaWithJavac", "compileDebugKotlin")) {
-            val task = project.tasks.findByName(name) as AbstractCompile?
-            if (task != null) {
-                it.dependsOn(task)
-                it.input.from(task.destinationDirectory)
-            }
+        // Doing this since KotlinCompile does not inherit AbstractCompile no more.
+        val compileKotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
+        if (compileKotlinTask != null) {
+            it.dependsOn(compileKotlinTask)
+            it.input.from(compileKotlinTask.destinationDirectory)
+        }
+
+        val compileJavaWithJavac = project.tasks.findByName("compileDebugJavaWithJavac") as AbstractCompile?
+        if (compileJavaWithJavac != null) {
+            it.dependsOn(compileJavaWithJavac)
+            it.input.from(compileJavaWithJavac.destinationDirectory)
         }
 
         it.outputFile.set(intermediates.resolve("classes.dex"))
@@ -126,7 +132,7 @@ fun registerTasks(project: Project) {
             it.from(compileDexTask.outputFile)
 
             val zip = it as Zip
-            if (extension.requiresResources) {
+            if (extension.requiresResources.get()) {
                 zip.dependsOn(compileResources.get())
             }
 

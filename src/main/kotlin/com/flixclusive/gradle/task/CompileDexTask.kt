@@ -96,7 +96,7 @@ abstract class CompileDexTask : DefaultTask() {
                         reader.accept(classNode, 0)
 
                         for (annotation in classNode.visibleAnnotations.orEmpty() + classNode.invisibleAnnotations.orEmpty()) {
-                            if (annotation.desc == "Lcom/flixclusive/annotations/FlixclusivePlugin;") {
+                            if (annotation.desc == "Lcom/flixclusive/provider/base/plugin/FlixclusivePlugin;") {
                                 val flixclusive = project.extensions.getFlixclusive()
 
                                 require(flixclusive.pluginClassName == null) {
@@ -104,7 +104,7 @@ abstract class CompileDexTask : DefaultTask() {
                                 }
 
                                 for (method in classNode.methods) {
-                                    if (method.name == "getManifest" && method.desc == "()Lcom/flixclusive/entities/Plugin\$Manifest;") {
+                                    if (method.name == "getManifest" && method.desc == "()Lcom/flixclusive/provider/base/plugin/PluginManifest;") {
                                         throw IllegalArgumentException("Plugin class cannot override getManifest, use manifest.json system!")
                                     }
                                 }
