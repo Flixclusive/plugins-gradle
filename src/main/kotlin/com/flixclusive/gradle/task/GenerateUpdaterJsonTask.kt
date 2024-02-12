@@ -16,7 +16,7 @@
 package com.flixclusive.gradle.task
 
 import com.flixclusive.gradle.entities.PluginData
-import com.flixclusive.gradle.getFlixclusive
+import com.flixclusive.gradle.findFlixclusive
 import com.flixclusive.gradle.util.createPluginData
 import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
@@ -35,7 +35,7 @@ abstract class GenerateUpdaterJsonTask : DefaultTask() {
         val list = LinkedList<PluginData>()
 
         for (subproject in project.allprojects) {
-            val flixclusive = subproject.extensions.getFlixclusive()
+            val flixclusive = subproject.extensions.findFlixclusive() ?: continue
 
             if (flixclusive.excludeFromUpdaterJson.get()) {
                 continue

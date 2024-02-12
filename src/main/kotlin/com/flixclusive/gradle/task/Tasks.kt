@@ -96,7 +96,7 @@ fun registerTasks(project: Project) {
     }
 
     project.afterEvaluate {
-        project.tasks.register("make", Zip::class.java) {
+        val make = project.tasks.register("make", Zip::class.java) {
             it.group = TASK_GROUP
             val compileDexTask = compileDex.get()
             it.dependsOn(compileDexTask)
@@ -147,9 +147,7 @@ fun registerTasks(project: Project) {
             }
         }
 
-        project.rootProject.tasks.getByName("generateUpdaterJson")
-            .dependsOn("make")
-
+        project.rootProject.tasks.getByName("generateUpdaterJson").dependsOn(make)
         project.tasks.register("deployWithAdb", DeployWithAdbTask::class.java) {
             it.group = TASK_GROUP
             it.dependsOn("make")
