@@ -33,13 +33,15 @@ data class Author(
  *
  * @property pluginClassName The fully qualified class name of the plugin.
  * @property name The name of the plugin.
- * @property version The version of the plugin.
+ * @property versionName The version name of the plugin.
+ * @property versionCode The version code of the plugin.
  * @property requiresResources Indicates whether the plugin requires resources from the main application/apk.
  */
 data class PluginManifest(
     val pluginClassName: String,
     val name: String,
-    val version: String,
+    val versionName: String,
+    val versionCode: Long,
     val requiresResources: Boolean,
     val updateUrl: String?,
 )

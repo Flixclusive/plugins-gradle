@@ -23,7 +23,8 @@ package com.flixclusive.gradle.entities
  * @property buildUrl The URL for downloading the plugin build.
  * @property changelog The changelog of the plugin, if available.
  * @property changelogMedia The media associated with the changelog, if available.
- * @property version The version of the plugin.
+ * @property versionName The version name of the plugin.
+ * @property versionCode The version code of the plugin.
  * @property description The description of the plugin.
  * @property iconUrl The URL to the icon/image associated with the plugin, if available.
  * @property language The primary [Language] supported by this plugin.
@@ -39,10 +40,11 @@ package com.flixclusive.gradle.entities
 data class PluginData(
     val authors: List<Author>,
     val repositoryUrl: String?,
-    var buildUrl: String?,
-    var changelog: String? = null,
-    var changelogMedia: String? = null,
-    var version: String,
+    val buildUrl: String?,
+    val changelog: String? = null,
+    val changelogMedia: String? = null,
+    val versionName: String,
+    val versionCode: Long,
     // ==================== \\
     val description: String?,
     val iconUrl: String?,

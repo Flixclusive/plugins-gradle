@@ -40,6 +40,11 @@ abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
      * */
     var buildBranch = "builds"
 
+    var versionMajor = 0
+    var versionMinor = 0
+    var versionPatch = 0
+    var versionBuild = 0
+
     val repositoryUrl: Property<String> = project.objects.property(String::class.java)
     val updateUrl: Property<String> = project.objects.property(String::class.java)
     val buildUrl: Property<String> = project.objects.property(String::class.java)
@@ -99,6 +104,20 @@ abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
                 buildUrl.set(getRawLink(filename = "%s.flx", branch = buildBranch))
                 repositoryUrl.set(this.url)
             }
+    }
+
+
+    /**
+     *
+     * @return a pair that contains the version name and code
+     * using the [versionMajor], [versionMinor], [versionPatch]
+     * and [versionBuild]
+     * */
+    fun getVersionDetails(): Pair<Long, String> {
+        val versionCode = versionMajor * 10000L + versionMinor * 1000 + versionPatch * 100 + versionBuild
+        val versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
+
+        return versionCode to versionName
     }
 }
 
