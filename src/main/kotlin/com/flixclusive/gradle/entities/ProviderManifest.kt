@@ -16,29 +16,27 @@
 package com.flixclusive.gradle.entities
 
 /**
- * Represents an author entity with associated information such as name, user link, and Discord ID.
+ * Represents an author entity with associated information such as name, github link.
  *
  * @property name The name of the author.
- * @property userLink The optional link associated with the author's profile.
- * @property discordId The optional Discord ID of the author.
+ * @property githubLink The optional link associated with the author's profile.
  */
 data class Author(
     val name: String,
-    val userLink: String? = null,
-    val discordId: Long? = null,
+    val githubLink: String? = null,
 )
 
 /**
- * Represents the manifest information of a plugin.
+ * Represents the manifest information of a provider.
  *
- * @property pluginClassName The fully qualified class name of the plugin.
- * @property name The name of the plugin.
- * @property versionName The version name of the plugin.
- * @property versionCode The version code of the plugin.
- * @property requiresResources Indicates whether the plugin requires resources from the main application/apk.
+ * @property providerClassName The fully qualified class name of the provider.
+ * @property name The name of the provider.
+ * @property versionName The version name of the provider.
+ * @property versionCode The version code of the provider.
+ * @property requiresResources Indicates whether the provider requires resources from the main application/apk.
  */
-data class PluginManifest(
-    val pluginClassName: String,
+data class ProviderManifest(
+    val providerClassName: String,
     val name: String,
     val versionName: String,
     val versionCode: Long,

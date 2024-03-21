@@ -17,7 +17,7 @@ package com.flixclusive.gradle
 
 import com.flixclusive.gradle.entities.Author
 import com.flixclusive.gradle.entities.Language
-import com.flixclusive.gradle.entities.PluginType
+import com.flixclusive.gradle.entities.ProviderType
 import com.flixclusive.gradle.entities.Repository.Companion.toValidRepositoryLink
 import com.flixclusive.gradle.entities.Status
 import org.gradle.api.Project
@@ -33,12 +33,7 @@ abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
      * */
     val authors: ListProperty<Author> = project.objects.listProperty(Author::class.java)
 
-    /**
-     * 
-     * If you're changing the `builds` branch, you might as well change
-     * your github actions for generating compiled plugins.
-     * */
-    var buildBranch = "builds"
+    private var buildBranch = "builds"
 
     var versionMajor = 0
     var versionMinor = 0
@@ -55,12 +50,12 @@ abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
     var flixclusive: FlixclusiveInfo? = null
         internal set
 
-    internal var pluginClassName: String? = null
+    internal var providerClassName: String? = null
 
     val description: Property<String> = project.objects.property(String::class.java)
     val iconUrl: Property<String> = project.objects.property(String::class.java)
     val language: Property<Language> = project.objects.property(Language::class.java)
-    val pluginType: Property<PluginType> = project.objects.property(PluginType::class.java)
+    val providerType: Property<ProviderType> = project.objects.property(ProviderType::class.java)
     val requiresResources: Property<Boolean> = project.objects.property(Boolean::class.java)
         .convention(false)
     val status: Property<Status> = project.objects.property(Status::class.java)
@@ -68,8 +63,8 @@ abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
 
     /**
      *
-     * Excludes this plugin from the updater, meaning it won't show up for users.
-     * Set this if the plugin is still on beta.
+     * Excludes this provider from the updater, meaning it won't show up for users.
+     * Set this if the provider is still on beta.
      * */
     val excludeFromUpdaterJson: Property<Boolean> =
         project.objects.property(Boolean::class.java).convention(false)
@@ -80,19 +75,16 @@ abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
      * Adds an author to the list of authors.
      *
      * @param name The name of the author.
-     * @param userLink The optional link associated with the author's profile.
-     * @param discordId The optional Discord ID of the author.
+     * @param githubLink The optional link associated with the author's github profile.
      */
     fun author(
         name: String,
-        userLink: String? = null,
-        discordId: Long? = null,
+        githubLink: String? = null
     ) {
         authors.add(
             Author(
                 name = name,
-                userLink = userLink,
-                discordId = discordId
+                githubLink = githubLink
             )
         )
     }

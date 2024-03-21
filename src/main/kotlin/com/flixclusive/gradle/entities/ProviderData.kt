@@ -16,28 +16,28 @@
 package com.flixclusive.gradle.entities
 
 /**
- * Represents the data associated with a plugin.
+ * Represents the data associated with a provider.
  *
- * @property authors The list of [Author]s who contributed to the plugin.
- * @property repositoryUrl The main repository URL of the plugin, if available.
- * @property buildUrl The URL for downloading the plugin build.
- * @property changelog The changelog of the plugin, if available.
+ * @property authors The list of [Author]s who contributed to the provider.
+ * @property repositoryUrl The main repository URL of the provider, if available.
+ * @property buildUrl The URL for downloading the provider build.
+ * @property changelog The changelog of the provider, if available.
  * @property changelogMedia The media associated with the changelog, if available.
- * @property versionName The version name of the plugin.
- * @property versionCode The version code of the plugin.
- * @property description The description of the plugin.
- * @property iconUrl The URL to the icon/image associated with the plugin, if available.
- * @property language The primary [Language] supported by this plugin.
- * @property name The name of the plugin.
- * @property pluginType The [PluginType] of the plugin.
- * @property status The [Status] of the plugin.
+ * @property versionName The version name of the provider.
+ * @property versionCode The version code of the provider.
+ * @property description The description of the provider.
+ * @property iconUrl The URL to the icon/image associated with the provider, if available.
+ * @property language The primary [Language] supported by this provider.
+ * @property name The name of the provider.
+ * @property providerType The [ProviderType] of the provider.
+ * @property status The [Status] of the provider.
  *
  * @see Status
  * @see Language
- * @see PluginType
+ * @see ProviderType
  * @see Author
  */
-data class PluginData(
+data class ProviderData(
     val authors: List<Author>,
     val repositoryUrl: String?,
     val buildUrl: String?,
@@ -50,6 +50,6 @@ data class PluginData(
     val iconUrl: String?,
     val language: Language,
     val name: String,
-    val pluginType: PluginType?,
+    val providerType: ProviderType?,
     val status: Status,
 )

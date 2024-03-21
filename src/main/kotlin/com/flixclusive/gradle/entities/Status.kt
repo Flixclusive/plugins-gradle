@@ -1,7 +1,7 @@
 package com.flixclusive.gradle.entities
 
 /**
- * Represents the status of a plugin.
+ * Represents the status of a provider.
  *
  * @see Down
  * @see Maintenance
@@ -9,15 +9,15 @@ package com.flixclusive.gradle.entities
  * @see Working
  */
 enum class Status {
-    /** Indicates that the plugin is currently down. */
+    /** Indicates that the provider is currently down. */
     Down,
 
-    /** Indicates that the plugin is under maintenance. */
+    /** Indicates that the provider is under maintenance. */
     Maintenance,
 
-    /** Indicates that the plugin is in beta testing. */
+    /** Indicates that the provider is in beta testing. */
     Beta,
 
-    /** Indicates that the plugin is working without issues. */
+    /** Indicates that the provider is working without issues. */
     Working
 }

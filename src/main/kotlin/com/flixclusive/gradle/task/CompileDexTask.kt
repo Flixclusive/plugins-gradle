@@ -46,7 +46,7 @@ abstract class CompileDexTask : DefaultTask() {
     abstract val outputFile: RegularFileProperty
 
     @get:OutputFile
-    abstract val pluginClassFile: RegularFileProperty
+    abstract val providerClassFile: RegularFileProperty
 
     @Suppress("UnstableApiUsage")
     @TaskAction
@@ -96,21 +96,21 @@ abstract class CompileDexTask : DefaultTask() {
                         reader.accept(classNode, 0)
 
                         for (annotation in classNode.visibleAnnotations.orEmpty() + classNode.invisibleAnnotations.orEmpty()) {
-                            if (annotation.desc == "Lcom/flixclusive/provider/base/plugin/FlixclusivePlugin;") {
+                            if (annotation.desc == "Lcom/flixclusive/provider/FlixclusiveProvider;") {
                                 val flixclusive = project.extensions.getFlixclusive()
 
-                                require(flixclusive.pluginClassName == null) {
-                                    "Only 1 active plugin class per project is supported"
+                                require(flixclusive.providerClassName == null) {
+                                    "Only 1 active provider class per project is supported"
                                 }
 
                                 for (method in classNode.methods) {
-                                    if (method.name == "getManifest" && method.desc == "()Lcom/flixclusive/provider/base/plugin/PluginManifest;") {
-                                        throw IllegalArgumentException("Plugin class cannot override getManifest, use manifest.json system!")
+                                    if (method.name == "getManifest" && method.desc == "()Lcom/flixclusive/provider/ProviderManifest;") {
+                                        throw IllegalArgumentException("Provider class cannot override getManifest, use manifest.json system!")
                                     }
                                 }
 
-                                flixclusive.pluginClassName = classNode.name.replace('/', '.')
-                                    .also { pluginClassFile.asFile.orNull?.writeText(it) }
+                                flixclusive.providerClassName = classNode.name.replace('/', '.')
+                                    .also { providerClassFile.asFile.orNull?.writeText(it) }
                             }
                         }
                     }

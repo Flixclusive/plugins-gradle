@@ -35,7 +35,7 @@ gradlePlugin {
     plugins {
         create("com.flixclusive.gradle") {
             id = "com.flixclusive.gradle"
-            implementationClass = "com.flixclusive.gradle.FlixclusivePlugin"
+            implementationClass = "com.flixclusive.gradle.FlixclusiveProvider"
         }
     }
 }
@@ -49,10 +49,10 @@ publishing {
         if (token != null) {
             maven {
                 credentials {
-                    username = "Flixclusive"
+                    username = "flixclusive"
                     password = token
                 }
-                setUrl("https://maven.pkg.github.com/Flixclusive/gradle")
+                setUrl("https://maven.pkg.github.com/flixclusive/gradle")
             }
         }
     }

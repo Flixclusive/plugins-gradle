@@ -1,21 +1,21 @@
 package com.flixclusive.gradle.util
 
 import com.flixclusive.gradle.entities.Language
-import com.flixclusive.gradle.entities.PluginData
-import com.flixclusive.gradle.entities.PluginManifest
+import com.flixclusive.gradle.entities.ProviderData
+import com.flixclusive.gradle.entities.ProviderManifest
 import com.flixclusive.gradle.getFlixclusive
 import org.gradle.api.Project
 
-fun Project.createPluginManifest(): PluginManifest {
+fun Project.createProviderManifest(): ProviderManifest {
     val extension = this.extensions.getFlixclusive()
     val (versionCode, versionName) = extension.getVersionDetails()
 
-    require(extension.pluginClassName != null) {
-        "No plugin class found, make sure your plugin class is annotated with @FlixclusivePlugin"
+    require(extension.providerClassName != null) {
+        "No provider class found, make sure your provider class is annotated with @FlixclusiveProvider"
     }
 
-    return PluginManifest(
-        pluginClassName = extension.pluginClassName!!,
+    return ProviderManifest(
+        providerClassName = extension.providerClassName!!,
         name = name,
         versionName = versionName,
         versionCode = versionCode,
@@ -24,11 +24,11 @@ fun Project.createPluginManifest(): PluginManifest {
     )
 }
 
-fun Project.createPluginData(): PluginData {
+fun Project.createProviderData(): ProviderData {
     val extension = extensions.getFlixclusive()
     val (versionCode, versionName) = extension.getVersionDetails()
 
-    return PluginData(
+    return ProviderData(
         buildUrl = extension.buildUrl.orNull?.let { String.format(it, name) },
         status = extension.status.get(),
         versionName = versionName,
@@ -39,7 +39,7 @@ fun Project.createPluginData(): PluginData {
         repositoryUrl = extension.repositoryUrl.orNull,
         language = extension.language.getOrElse(Language.Specific("en")),
         iconUrl = extension.iconUrl.orNull,
-        pluginType = extension.pluginType.orNull,
+        providerType = extension.providerType.orNull,
         changelog = extension.changelog.orNull,
         changelogMedia = extension.changelogMedia.orNull
     )

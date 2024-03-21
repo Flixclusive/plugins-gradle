@@ -1,7 +1,7 @@
 package com.flixclusive.gradle.entities
 
 /**
- * Represents the language of a plugin.
+ * Represents the language of a provider.
  *
  * @param languageCode The shorthand code representing the language (e.g., "en", "fr", "ph").
  *
@@ -10,12 +10,12 @@ package com.flixclusive.gradle.entities
  */
 sealed class Language(val languageCode: String? = null) {
     /**
-     * Represents a plugin with multiple languages.
+     * Represents a provider with multiple languages.
      */
     object Multiple : Language()
 
     /**
-     * Represents a plugin with a specific language.
+     * Represents a provider with a specific language.
      *
      * @param languageCode The shorthand code representing the specific language.
      */

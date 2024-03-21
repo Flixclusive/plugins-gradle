@@ -1,1 +1,1 @@
-rootProject.name = "plugins-gradle"
+rootProject.name = "providers-gradle"

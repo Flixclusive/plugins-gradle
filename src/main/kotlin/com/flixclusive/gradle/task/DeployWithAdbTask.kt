@@ -53,7 +53,7 @@ abstract class DeployWithAdbTask : DefaultTask() {
 
         val file = make.outputs.files.singleFile
 
-        val path = "/storage/emulated/0/Flixclusive/plugins"
+        val path = "/storage/emulated/0/Flixclusive/providers"
 
         device.push(file, RemoteFile(path + file.name))
 

@@ -18,7 +18,7 @@ package com.flixclusive.gradle.task
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessLibraryManifest
 import com.flixclusive.gradle.getFlixclusive
-import com.flixclusive.gradle.util.createPluginManifest
+import com.flixclusive.gradle.util.createProviderManifest
 import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
 import org.gradle.api.Project
@@ -47,12 +47,12 @@ fun registerTasks(project: Project) {
         it.group = TASK_GROUP
     }
 
-    val pluginClassFile = intermediates.resolve("pluginClass")
+    val providerClassFile = intermediates.resolve("providerClass")
 
     val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) {
         it.group = TASK_GROUP
 
-        it.pluginClassFile.set(pluginClassFile)
+        it.providerClassFile.set(providerClassFile)
 
         // Doing this since KotlinCompile does not inherit AbstractCompile no more.
         val compileKotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
@@ -110,19 +110,19 @@ fun registerTasks(project: Project) {
                     "No version is set"
                 }
 
-                if (extension.pluginClassName == null) {
-                    if (pluginClassFile.exists()) {
-                        extension.pluginClassName = pluginClassFile.readText()
+                if (extension.providerClassName == null) {
+                    if (providerClassFile.exists()) {
+                        extension.providerClassName = providerClassFile.readText()
                     }
                 }
 
-                require(extension.pluginClassName != null) {
-                    "No plugin class found, make sure your plugin class is annotated with @FlixclusivePlugin"
+                require(extension.providerClassName != null) {
+                    "No provider class found, make sure your provider class is annotated with @FlixclusiveProvider"
                 }
 
                 manifestFile.writeText(
                     JsonBuilder(
-                        project.createPluginManifest(),
+                        project.createProviderManifest(),
                         JsonGenerator.Options()
                             .excludeNulls()
                             .build()
