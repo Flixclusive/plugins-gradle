@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "1.9.10"
     id("java-gradle-plugin")
     id("maven-publish")
+    kotlin("plugin.serialization") version "1.9.10"
 }
 
 group = "com.flixclusive"
@@ -19,6 +20,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib", kotlin.coreLibrariesVersion))
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     compileOnly(gradleApi())
 
     compileOnly("com.google.guava:guava:30.1.1-jre")

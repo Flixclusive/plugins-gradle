@@ -1,5 +1,7 @@
 package com.flixclusive.gradle.entities
 
+import kotlinx.serialization.Serializable
+
 /**
  * Represents a repository.
  * All credits to Cloudstream for the code references.
@@ -9,7 +11,8 @@ package com.flixclusive.gradle.entities
  * @param url The URL of the repository.
  * @param rawLinkFormat The raw link format used for generating raw links to files in the repository.
  */
-class Repository(
+@Serializable
+data class Repository(
     val owner: String,
     val name: String,
     val url: String,
