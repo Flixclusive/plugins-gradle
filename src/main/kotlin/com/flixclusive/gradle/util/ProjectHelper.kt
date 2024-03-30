@@ -37,7 +37,7 @@ fun Project.createProviderData(): ProviderData {
         authors = extension.authors.getOrElse(emptyList()),
         description = extension.description.orNull,
         repositoryUrl = extension.repositoryUrl.orNull,
-        language = extension.language.getOrElse(Language.Specific(languageCode = "en")),
+        language = extension.language.getOrElse(Language(languageCode = "en")),
         iconUrl = extension.iconUrl.orNull,
         providerType = extension.providerType.orNull,
         changelog = extension.changelog.orNull,
