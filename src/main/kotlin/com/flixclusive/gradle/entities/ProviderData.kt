@@ -15,6 +15,8 @@
 
 package com.flixclusive.gradle.entities
 
+import kotlinx.serialization.Serializable
+
 /**
  * Represents the data associated with a provider.
  *
@@ -37,6 +39,7 @@ package com.flixclusive.gradle.entities
  * @see ProviderType
  * @see Author
  */
+@Serializable
 data class ProviderData(
     val authors: List<Author>,
     val repositoryUrl: String?,

@@ -15,12 +15,15 @@
 
 package com.flixclusive.gradle.entities
 
+import kotlinx.serialization.Serializable
+
 /**
  * Represents an author entity with associated information such as name, github link.
  *
  * @property name The name of the author.
  * @property githubLink The optional link associated with the author's profile.
  */
+@Serializable
 data class Author(
     val name: String,
     val githubLink: String? = null,
@@ -35,6 +38,7 @@ data class Author(
  * @property versionCode The version code of the provider.
  * @property requiresResources Indicates whether the provider requires resources from the main application/apk.
  */
+@Serializable
 data class ProviderManifest(
     val providerClassName: String,
     val name: String,

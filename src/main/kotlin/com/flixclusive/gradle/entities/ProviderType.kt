@@ -1,34 +1,34 @@
 package com.flixclusive.gradle.entities
 
+import kotlinx.serialization.Serializable
+
 /**
- * Represents the type of provider.
- * This sealed class defines various types of providers such as Movies, TV shows, and custom types.
+ * Represents the type of content the provider offers.
  *
- * @param customType Optional custom type for user-defined provider types.
- *
- * @see All
- * @see Movies
- * @see TvShows
- * @see Custom
+ * @param type The provider type (e.g., "Movies", "TV Shows", or custom type).
  */
-sealed class ProviderType(val type: String) {
-    /** Represents a provider type that includes all types of providers. */
-    object All : ProviderType(type = "All")
+@Serializable
+data class ProviderType(val type: String) {
+    companion object {
+        val All = ProviderType("Movies, TV Shows, etc.")
+        val Movies = ProviderType("Movies")
+        val TvShows = ProviderType("TV Shows")
+    }
 
-    /** Represents a provider type specifically for movies. */
-    object Movies : ProviderType(type = "Movies")
-
-    /** Represents a provider type specifically for TV shows. */
-    object TvShows : ProviderType(type = "TV Shows")
-
-    /**
-     * Represents a custom provider type defined by the user.
-     *
-     * @param customType The custom type for user-defined provider types.
-     */
-    class Custom(customType: String) : ProviderType(type = customType)
+    override fun equals(other: Any?): Boolean {
+        return when(other) {
+            is ProviderType -> other.type.equals(type, true)
+            is String -> other.equals(type, true)
+            else -> super.equals(other)
+        }
+    }
 
     override fun toString(): String {
         return type
     }
+
+    override fun hashCode(): Int {
+        return type.hashCode() * 31
+    }
 }
+

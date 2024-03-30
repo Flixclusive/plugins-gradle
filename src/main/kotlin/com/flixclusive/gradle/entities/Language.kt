@@ -1,27 +1,20 @@
 package com.flixclusive.gradle.entities
 
+import kotlinx.serialization.Serializable
+
 /**
  * Represents the language of a provider.
  *
- * @param language The shorthand code representing the language (e.g., "en", "fr", "ph").
- *
- * @see Multiple
- * @see Specific
+ * @param languageCode The shorthand code representing the language (e.g., "en", "fr", "ph") or "Multiple" for providers with multiple languages.
  */
-sealed class Language(val language: String) {
-    /**
-     * Represents a provider with multiple languages.
-     */
-    object Multiple : Language(language = "Multiple")
-
-    /**
-     * Represents a provider with a specific language.
-     *
-     * @param languageCode The shorthand code representing the specific language.
-     */
-    class Specific(languageCode: String) : Language(language = languageCode)
+@Serializable
+data class Language(val languageCode: String) {
+    companion object {
+        val Multiple = Language("Multiple")
+    }
 
     override fun toString(): String {
-        return language
+        return languageCode
     }
 }
+
