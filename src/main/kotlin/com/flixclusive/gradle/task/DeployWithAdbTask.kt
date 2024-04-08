@@ -23,7 +23,7 @@ import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
-import org.gradle.internal.impldep.com.google.common.reflect.TypeToken
+import org.jetbrains.kotlin.com.google.common.reflect.TypeToken
 import org.jetbrains.kotlin.com.google.gson.Gson
 import se.vidstige.jadb.*
 import java.io.File
