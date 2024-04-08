@@ -16,18 +16,28 @@
 package com.flixclusive.gradle.task
 
 import com.android.build.gradle.BaseExtension
+import com.flixclusive.gradle.entities.Repository
+import com.flixclusive.gradle.util.buildValidFilename
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.internal.impldep.com.google.common.reflect.TypeToken
+import org.jetbrains.kotlin.com.google.gson.Gson
 import se.vidstige.jadb.*
+import java.io.File
+import java.io.Reader
 import java.nio.charset.StandardCharsets
 
 abstract class DeployWithAdbTask : DefaultTask() {
     @get:Input
-    @set:Option(option = "wait-for-debugger", description = "Enables debugging flag when starting the discord activity")
+    @set:Option(option = "wait-for-debugger", description = "Enables debugging flag when starting the main activity")
     var waitForDebugger: Boolean = false
+
+    @get:Input
+    @set:Option(option = "debug-app", description = "Load the provider on the debug app")
+    var debugApp: Boolean = false
 
     @TaskAction
     fun deployWithAdb() {
@@ -49,15 +59,15 @@ abstract class DeployWithAdbTask : DefaultTask() {
 
         val device = devices[0]
 
-        val make = project.tasks.getByName("make") as AbstractCopyTask
+        if (!pushFilesToLocalPath(device)) {
+            return
+        }
 
-        val file = make.outputs.files.singleFile
+        val activityPath = if (debugApp) {
+            "com.flixclusive.debug/com.flixclusive.mobile.MobileActivity"
+        } else "com.flixclusive/com.flixclusive.mobile.MobileActivity"
 
-        val path = "/storage/emulated/0/Flixclusive/providers"
-
-        device.push(file, RemoteFile(path + file.name))
-
-        val args = arrayListOf("start", "-S", "-n", "com.flixclusive.mobile/com.flixclusive.mobile.MobileActivity")
+        val args = arrayListOf("start", "-S", "-n", activityPath)
 
         if (waitForDebugger) {
             args.add("-D")
@@ -71,6 +81,44 @@ abstract class DeployWithAdbTask : DefaultTask() {
             logger.error(response)
         }
 
-        logger.lifecycle("Deployed $file to ${device.serial}")
+        logger.lifecycle("Deployed to ${device.serial}")
+    }
+
+
+    private fun pushFilesToLocalPath(device: JadbDevice): Boolean {
+        val makeTask = project.tasks.getByName("make") as AbstractCopyTask
+        val updaterJsonTask = project.tasks.getByName("generateUpdaterJson") as AbstractCopyTask
+
+        val providerFile = makeTask.outputs.files.singleFile
+        val updaterJsonFile = updaterJsonTask.outputs.files.singleFile
+
+        val randomProvider = fromJson<List<Repository>>(updaterJsonFile.reader())
+            .randomOrNull()
+            ?: return false
+        val sanitizedFolderName = buildValidFilename(randomProvider.url)
+
+        val fullPath = LOCAL_FILE_PATH + "/${sanitizedFolderName}/${providerFile.name}"
+        val fileToPush = File(fullPath)
+
+        if (!fileToPush.exists()) {
+            val isSuccess = fileToPush.mkdirs()
+            if (!isSuccess) {
+                logger.error("Failed to create local directories when loading providers.")
+                return false
+            }
+        }
+
+        device.push(providerFile, RemoteFile(fullPath))
+        logger.lifecycle("${providerFile.nameWithoutExtension} have been pushed...")
+
+        return true
+    }
+
+    private inline fun <reified T> fromJson(
+        reader: Reader
+    ): T = Gson().fromJson(reader, object : TypeToken<T>() {}.type)
+
+    companion object {
+        private const val LOCAL_FILE_PATH = "/storage/emulated/0/Flixclusive/providers/"
     }
 }
