@@ -87,7 +87,7 @@ abstract class DeployWithAdbTask : DefaultTask() {
 
     private fun pushFilesToLocalPath(device: JadbDevice): Boolean {
         val makeTask = project.tasks.getByName("make") as AbstractCopyTask
-        val updaterJsonTask = project.rootProject.tasks.getByName("generateUpdaterJson") as AbstractCopyTask
+        val updaterJsonTask = project.rootProject.tasks.getByName("generateUpdaterJson")
 
         val providerFile = makeTask.outputs.files.singleFile
         val updaterJsonFile = updaterJsonTask.outputs.files.singleFile
