@@ -29,7 +29,6 @@ import se.vidstige.jadb.JadbDevice
 import se.vidstige.jadb.JadbException
 import se.vidstige.jadb.RemoteFile
 import se.vidstige.jadb.Subprocess
-import java.io.File
 import java.nio.charset.StandardCharsets
 
 abstract class DeployWithAdbTask : DefaultTask() {
@@ -101,19 +100,10 @@ abstract class DeployWithAdbTask : DefaultTask() {
 
         val sanitizedFolderName = buildValidFilename(repositoryUrl)
 
-        val fullPath = LOCAL_FILE_PATH + "/${sanitizedFolderName}/${providerFile.name}"
-        val fileToPush = File(fullPath)
-
-        if (!fileToPush.exists()) {
-            val isSuccess = fileToPush.mkdirs()
-            if (!isSuccess) {
-                logger.error("Failed to create local directories when loading providers.")
-                return false
-            }
-        }
+        val fullPath = LOCAL_FILE_PATH + "${sanitizedFolderName}/${providerFile.name}"
 
         device.push(providerFile, RemoteFile(fullPath))
-        logger.lifecycle("${providerFile.nameWithoutExtension} have been pushed...")
+        logger.lifecycle("${providerFile.nameWithoutExtension} have been pushed on $fullPath.")
 
         return true
     }
