@@ -86,8 +86,8 @@ fun registerTasks(project: Project) {
             val resApkFile = it.outputFile.asFile.get()
 
             if (resApkFile.exists()) {
-                project.tasks.named("make", AbstractCopyTask::class.java) {
-                    it.from(project.zipTree(resApkFile)) { copySpec ->
+                project.tasks.named("make", AbstractCopyTask::class.java) { makeTask ->
+                    makeTask.from(project.zipTree(resApkFile)) { copySpec ->
                         copySpec.exclude("AndroidManifest.xml")
                     }
                 }
@@ -152,7 +152,7 @@ fun registerTasks(project: Project) {
         project.tasks.register("deployWithAdb", DeployWithAdbTask::class.java) {
             it.group = TASK_GROUP
             it.dependsOn("make")
-            it.dependsOn("generateUpdaterJson")
+            it.dependsOn(":generateUpdaterJson")
         }
 
         project.tasks.register("cleanCache", CleanCacheTask::class.java) {
