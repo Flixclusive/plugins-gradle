@@ -88,8 +88,10 @@ abstract class DeployWithAdbTask : DefaultTask() {
 
     private fun pushProviderToLocalStorage(device: JadbDevice, isDebug: Boolean): Boolean {
         val makeTask = project.tasks.getByName("make") as AbstractCopyTask
+        val generateUpdaterJsonTask = project.rootProject.tasks.getByName("generateUpdaterJson")
 
         val providerFile = makeTask.outputs.files.singleFile
+        val updaterJson = generateUpdaterJsonTask.outputs.files.singleFile
         val repositoryUrl = project.extensions.getFlixclusive()
             .repositoryUrl.orNull
 
@@ -101,10 +103,12 @@ abstract class DeployWithAdbTask : DefaultTask() {
         val sanitizedFolderName = buildValidFilename(repositoryUrl)
 
         val initialPath = if (isDebug) DEBUG_LOCAL_FILE_PATH else LOCAL_FILE_PATH
-        val fullPath = initialPath + "${sanitizedFolderName}/${providerFile.name}"
+        val providerPath = initialPath + "${sanitizedFolderName}/${providerFile.name}"
+        val updaterJsonPath = initialPath + "${sanitizedFolderName}/${updaterJson.name}"
 
-        device.push(providerFile, RemoteFile(fullPath))
-        logger.lifecycle("${providerFile.nameWithoutExtension} have been pushed on $fullPath.")
+        device.push(providerFile, RemoteFile(providerPath))
+        device.push(updaterJson, RemoteFile(updaterJsonPath))
+        logger.lifecycle("${providerFile.nameWithoutExtension} have been pushed on $providerPath.")
 
         return true
     }
