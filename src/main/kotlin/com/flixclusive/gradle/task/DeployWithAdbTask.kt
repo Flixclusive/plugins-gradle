@@ -60,7 +60,7 @@ abstract class DeployWithAdbTask : DefaultTask() {
 
         val device = devices[0]
 
-        if (!pushProviderToLocalStorage(device)) {
+        if (!pushProviderToLocalStorage(device, debugApp)) {
             return
         }
 
@@ -86,7 +86,7 @@ abstract class DeployWithAdbTask : DefaultTask() {
     }
 
 
-    private fun pushProviderToLocalStorage(device: JadbDevice): Boolean {
+    private fun pushProviderToLocalStorage(device: JadbDevice, isDebug: Boolean): Boolean {
         val makeTask = project.tasks.getByName("make") as AbstractCopyTask
 
         val providerFile = makeTask.outputs.files.singleFile
@@ -100,7 +100,8 @@ abstract class DeployWithAdbTask : DefaultTask() {
 
         val sanitizedFolderName = buildValidFilename(repositoryUrl)
 
-        val fullPath = LOCAL_FILE_PATH + "${sanitizedFolderName}/${providerFile.name}"
+        val initialPath = if (isDebug) DEBUG_LOCAL_FILE_PATH else LOCAL_FILE_PATH
+        val fullPath = initialPath + "${sanitizedFolderName}/${providerFile.name}"
 
         device.push(providerFile, RemoteFile(fullPath))
         logger.lifecycle("${providerFile.nameWithoutExtension} have been pushed on $fullPath.")
@@ -109,6 +110,7 @@ abstract class DeployWithAdbTask : DefaultTask() {
     }
 
     companion object {
-        private const val LOCAL_FILE_PATH = "/storage/emulated/0/Flixclusive/providers/"
+        private const val DEBUG_LOCAL_FILE_PATH = "/storage/emulated/0/Android/data/com.flixclusive.debug/files/providers/"
+        private const val LOCAL_FILE_PATH = "/storage/emulated/0/Android/data/com.flixclusive/files/providers/"
     }
 }
