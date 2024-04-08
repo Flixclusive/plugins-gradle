@@ -16,18 +16,20 @@
 package com.flixclusive.gradle.task
 
 import com.android.build.gradle.BaseExtension
-import com.flixclusive.gradle.entities.Repository
+import com.flixclusive.gradle.getFlixclusive
 import com.flixclusive.gradle.util.buildValidFilename
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
-import org.jetbrains.kotlin.com.google.common.reflect.TypeToken
-import org.jetbrains.kotlin.com.google.gson.Gson
-import se.vidstige.jadb.*
+import se.vidstige.jadb.AdbServerLauncher
+import se.vidstige.jadb.JadbConnection
+import se.vidstige.jadb.JadbDevice
+import se.vidstige.jadb.JadbException
+import se.vidstige.jadb.RemoteFile
+import se.vidstige.jadb.Subprocess
 import java.io.File
-import java.io.Reader
 import java.nio.charset.StandardCharsets
 
 abstract class DeployWithAdbTask : DefaultTask() {
@@ -59,7 +61,7 @@ abstract class DeployWithAdbTask : DefaultTask() {
 
         val device = devices[0]
 
-        if (!pushFilesToLocalPath(device)) {
+        if (!pushProviderToLocalStorage(device)) {
             return
         }
 
@@ -85,17 +87,19 @@ abstract class DeployWithAdbTask : DefaultTask() {
     }
 
 
-    private fun pushFilesToLocalPath(device: JadbDevice): Boolean {
+    private fun pushProviderToLocalStorage(device: JadbDevice): Boolean {
         val makeTask = project.tasks.getByName("make") as AbstractCopyTask
-        val updaterJsonTask = project.rootProject.tasks.getByName("generateUpdaterJson")
 
         val providerFile = makeTask.outputs.files.singleFile
-        val updaterJsonFile = updaterJsonTask.outputs.files.singleFile
+        val repositoryUrl = project.extensions.getFlixclusive()
+            .repositoryUrl.orNull
 
-        val randomProvider = fromJson<List<Repository>>(updaterJsonFile.reader())
-            .randomOrNull()
-            ?: return false
-        val sanitizedFolderName = buildValidFilename(randomProvider.url)
+        if (repositoryUrl == null) {
+            logger.error("Repository URL has not been set. Please set it on the project-level build.gradle.kts file")
+            return false
+        }
+
+        val sanitizedFolderName = buildValidFilename(repositoryUrl)
 
         val fullPath = LOCAL_FILE_PATH + "/${sanitizedFolderName}/${providerFile.name}"
         val fileToPush = File(fullPath)
@@ -113,10 +117,6 @@ abstract class DeployWithAdbTask : DefaultTask() {
 
         return true
     }
-
-    private inline fun <reified T> fromJson(
-        reader: Reader
-    ): T = Gson().fromJson(reader, object : TypeToken<T>() {}.type)
 
     companion object {
         private const val LOCAL_FILE_PATH = "/storage/emulated/0/Flixclusive/providers/"

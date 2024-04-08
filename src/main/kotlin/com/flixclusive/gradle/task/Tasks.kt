@@ -152,7 +152,6 @@ fun registerTasks(project: Project) {
         project.tasks.register("deployWithAdb", DeployWithAdbTask::class.java) {
             it.group = TASK_GROUP
             it.dependsOn("make")
-            it.dependsOn(":generateUpdaterJson")
         }
 
         project.tasks.register("cleanCache", CleanCacheTask::class.java) {
