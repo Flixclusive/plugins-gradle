@@ -15,36 +15,41 @@
 
 package com.flixclusive.gradle.configuration
 
+import com.flixclusive.gradle.GithubData.Companion.toGithubData
 import com.flixclusive.gradle.createProgressLogger
 import com.flixclusive.gradle.download
-import com.flixclusive.gradle.FlixclusiveInfo
+import com.flixclusive.gradle.Stubs
 import com.flixclusive.gradle.getFlixclusive
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
-import java.net.URL
 
-class FlixclusiveConfigurationProvider : IConfigurationProvider {
+class GetProviderStubsConfigurationProvider : IConfigurationProvider {
 
     override val name: String
-        get() = "flixclusive"
+        get() = "getProviderStubs"
 
     override fun provide(project: Project, dependency: Dependency) {
         with(project) {
             val extension = extensions.getFlixclusive()
-            val flixclusive = FlixclusiveInfo(extension, dependency.version ?: "pre-release").also { extension.flixclusive = it }
+            val stubs = Stubs(
+                extension = extension,
+                data = dependency.toGithubData()
+            ).also { extension.stubs = it }
 
-            flixclusive.cache.mkdirs()
+            if (!stubs.file.exists()) {
+                logger.lifecycle("Downloading provider stubs")
 
-            if (!flixclusive.jarFile.exists()) {
-                logger.lifecycle("Downloading Flixclusive JAR")
-
-                val url = URL("${flixclusive.urlPrefix}/classes.jar")
-
-                url.download(flixclusive.jarFile, createProgressLogger(project, "Download Flixclusive JAR"))
+                stubs.githubAarDownloadUrl.download(
+                    file = stubs.file,
+                    progressLogger = createProgressLogger(
+                        project = project,
+                        loggerCategory = "Download provider stubs"
+                    )
+                )
             }
 
-            dependencies.add("compileOnly", files(flixclusive.jarFile))
-            dependencies.add("testImplementation", files(flixclusive.jarFile))
+            dependencies.add("compileOnly", files(stubs.file))
+            dependencies.add("testImplementation", files(stubs.file))
         }
     }
 }

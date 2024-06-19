@@ -9,10 +9,10 @@ abstract class CleanCacheTask : DefaultTask() {
     @TaskAction
     fun cleanCache() {
         val extension = project.extensions.getFlixclusive()
-        val flixclusive = extension.flixclusive ?: return
+        val stubs = extension.stubs ?: return
 
-        if (flixclusive.jarFile.exists()) {
-            flixclusive.jarFile.delete()
+        if (stubs.file.exists()) {
+            stubs.file.delete()
         }
     }
 }

@@ -21,12 +21,15 @@ import com.flixclusive.gradle.entities.ProviderType
 import com.flixclusive.gradle.entities.Repository.Companion.toValidRepositoryLink
 import com.flixclusive.gradle.entities.Status
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import java.net.URL
 import javax.inject.Inject
 
-abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
+@Suppress("unused", "MemberVisibilityCanBePrivate")
+abstract class ProviderExtension @Inject constructor(val project: Project) {
     /**
      *
      * [Author]s of the extension
@@ -44,20 +47,58 @@ abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
     val updateUrl: Property<String> = project.objects.property(String::class.java)
     val buildUrl: Property<String> = project.objects.property(String::class.java)
 
+    /**
+     * Changelogs of the provider
+     * */
     val changelog: Property<String> = project.objects.property(String::class.java)
-    val changelogMedia: Property<String> = project.objects.property(String::class.java)
 
-    var flixclusive: FlixclusiveInfo? = null
+    var stubs: Stubs? = null
         internal set
 
     internal var providerClassName: String? = null
 
+    /** The provider's description */
     val description: Property<String> = project.objects.property(String::class.java)
+    /**
+     * If your provider has an icon, put its image url here.
+     *
+     * This is an optional property.
+     * */
     val iconUrl: Property<String> = project.objects.property(String::class.java)
+    /**
+     * The main language of your provider.
+     *
+     * There are two supported values:
+     * - Language.Multiple
+     *      - Obviously for providers w/ multiple language support.
+     * - Language("en")
+     *      - For specific languages only. NOTE: Use the language's short-hand code.
+     */
     val language: Property<Language> = project.objects.property(Language::class.java)
+    /**
+     * The main type that your provider supports.
+     *
+     * These are the possible values you could set:
+     * - ProviderType.All
+     * - ProviderType.TvShows
+     * - ProviderType.Movies
+     * - ProviderType(customType: String) // i.e., ProviderType("Anime")
+     */
     val providerType: Property<ProviderType> = project.objects.property(ProviderType::class.java)
+    /**
+     * Toggle this if this provider has its own resources.
+     */
     val requiresResources: Property<Boolean> = project.objects.property(Boolean::class.java)
         .convention(false)
+    /**
+     * The current status of this provider.
+     *
+     * These are the possible values you could set:
+     * - Status.Beta
+     * - Status.Maintenance
+     * - Status.Down
+     * - Status.Working
+     */
     val status: Property<Status> = project.objects.property(Status::class.java)
         .convention(Status.Beta)
 
@@ -69,7 +110,8 @@ abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
     val excludeFromUpdaterJson: Property<Boolean> =
         project.objects.property(Boolean::class.java).convention(false)
 
-    val userCache = project.gradle.gradleUserHomeDir.resolve("caches").resolve("flixclusive")
+    val userCache = project.gradle.gradleUserHomeDir
+        .resolve("caches")
 
     /**
      * Adds an author to the list of authors.
@@ -89,6 +131,11 @@ abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
         )
     }
 
+    /**
+     * Sets the repository URL this provider belongs to
+     *
+     * @param url The url of the repository.
+     */
     fun setRepository(url: String) {
         url.toValidRepositoryLink()
             .run {
@@ -100,11 +147,12 @@ abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
 
 
     /**
+     * Calculates and returns version details.
      *
-     * @return a pair that contains the version name and code
-     * using the [versionMajor], [versionMinor], [versionPatch]
-     * and [versionBuild]
-     * */
+     * @return A Pair containing the version code (Long) and version name (String)
+     * calculated using the [versionMajor], [versionMinor], [versionPatch], and
+     * [versionBuild] properties.
+     */
     fun getVersionDetails(): Pair<Long, String> {
         val versionCode = versionMajor * 10000L + versionMinor * 1000 + versionPatch * 100 + versionBuild
         val versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
@@ -113,18 +161,44 @@ abstract class FlixclusiveExtension @Inject constructor(val project: Project) {
     }
 }
 
-class FlixclusiveInfo(extension: FlixclusiveExtension, version: String) {
-    val cache = extension.userCache.resolve("flixclusive")
+data class GithubData(
+    val owner: String,
+    val repository: String,
+    val tag: String,
+) {
+    companion object {
+        private const val DEFAULT_GITHUB_REPOSITORY_OWNER = "rhenwinch"
+        private const val DEFAULT_GITHUB_REPOSITORY = "Flixclusive"
+        private const val DEFAULT_GITHUB_RELEASE_TAG = "pre-release"
 
-    val urlPrefix =
-        "https://github.com/rhenwinch/Flixclusive/releases/download/${version}"
-    val jarFile = cache.resolve("flixclusive.jar")
+        fun Dependency.toGithubData(): GithubData
+            = GithubData(
+                owner = group ?: DEFAULT_GITHUB_REPOSITORY_OWNER,
+                repository = name ?: DEFAULT_GITHUB_REPOSITORY,
+                tag = version ?: DEFAULT_GITHUB_RELEASE_TAG,
+            )
+    }
 }
 
-fun ExtensionContainer.getFlixclusive(): FlixclusiveExtension {
-    return getByName("flixclusive") as FlixclusiveExtension
+class Stubs(
+    extension: ProviderExtension,
+    data: GithubData
+) {
+    private val cache = extension.userCache.resolve("provider-stubs")
+
+    val githubAarDownloadUrl =
+        URL("https://github.com/${data.owner}/${data.repository}/releases/download/${data.tag}/provider-stubs.aar")
+    val file = cache.resolve("provider-stubs.aar")
+
+    init {
+        cache.mkdirs()
+    }
 }
 
-fun ExtensionContainer.findFlixclusive(): FlixclusiveExtension? {
-    return findByName("flixclusive") as FlixclusiveExtension?
+fun ExtensionContainer.getFlixclusive(): ProviderExtension {
+    return getByName("provider") as ProviderExtension
+}
+
+fun ExtensionContainer.findFlixclusive(): ProviderExtension? {
+    return findByName("provider") as ProviderExtension?
 }

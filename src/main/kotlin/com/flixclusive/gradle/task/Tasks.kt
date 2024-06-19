@@ -43,10 +43,6 @@ fun registerTasks(project: Project) {
         }
     }
 
-    project.tasks.register("genSources", GenSourcesTask::class.java) {
-        it.group = TASK_GROUP
-    }
-
     val providerClassFile = intermediates.resolve("providerClass")
 
     val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) {

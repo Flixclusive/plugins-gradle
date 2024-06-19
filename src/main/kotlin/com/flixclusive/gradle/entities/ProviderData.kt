@@ -24,7 +24,6 @@ import kotlinx.serialization.Serializable
  * @property repositoryUrl The main repository URL of the provider, if available.
  * @property buildUrl The URL for downloading the provider build.
  * @property changelog The changelog of the provider, if available.
- * @property changelogMedia The media associated with the changelog, if available.
  * @property versionName The version name of the provider.
  * @property versionCode The version code of the provider.
  * @property description The description of the provider.
@@ -45,7 +44,6 @@ data class ProviderData(
     val repositoryUrl: String?,
     val buildUrl: String?,
     val changelog: String? = null,
-    val changelogMedia: String? = null,
     val versionName: String,
     val versionCode: Long,
     // ==================== \\

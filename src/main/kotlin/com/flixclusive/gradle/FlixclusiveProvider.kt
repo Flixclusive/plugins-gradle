@@ -20,9 +20,10 @@ import com.flixclusive.gradle.task.registerTasks
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+@Suppress("unused")
 abstract class FlixclusiveProvider : Plugin<Project> {
     override fun apply(project: Project) {
-        project.extensions.create("flixclusive", FlixclusiveExtension::class.java, project)
+        project.extensions.create("provider", ProviderExtension::class.java, project)
 
         registerTasks(project)
         registerConfigurations(project)

@@ -40,7 +40,6 @@ fun Project.createProviderData(): ProviderData {
         language = extension.language.getOrElse(Language(languageCode = "en")),
         iconUrl = extension.iconUrl.orNull,
         providerType = extension.providerType.orNull,
-        changelog = extension.changelog.orNull,
-        changelogMedia = extension.changelogMedia.orNull
+        changelog = extension.changelog.orNull
     )
 }

@@ -42,20 +42,19 @@ gradlePlugin {
     }
 }
 
+val sourcesJar = tasks.register<Jar>("sourcesJar") {
+    archiveClassifier.set("sources")
+    from("src/main/kotlin")
+}
+
 publishing {
     repositories {
         mavenLocal()
+    }
 
-        val token = System.getenv("GITHUB_TOKEN")
-
-        if (token != null) {
-            maven {
-                credentials {
-                    username = "flixclusive"
-                    password = token
-                }
-                setUrl("https://maven.pkg.github.com/flixclusive/gradle")
-            }
+    publications {
+        create<MavenPublication>("release") {
+            artifact(sourcesJar)
         }
     }
 }
