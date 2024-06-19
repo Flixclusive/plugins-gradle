@@ -23,7 +23,7 @@ import org.gradle.api.Project
 @Suppress("unused")
 abstract class FlixclusiveProvider : Plugin<Project> {
     override fun apply(project: Project) {
-        project.extensions.create("provider", ProviderExtension::class.java, project)
+        project.extensions.create("flxProvider", FlixclusiveProviderExtension::class.java, project)
 
         registerTasks(project)
         registerConfigurations(project)

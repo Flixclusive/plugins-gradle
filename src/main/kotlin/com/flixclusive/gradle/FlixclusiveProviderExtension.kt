@@ -29,7 +29,7 @@ import java.net.URL
 import javax.inject.Inject
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-abstract class ProviderExtension @Inject constructor(val project: Project) {
+abstract class FlixclusiveProviderExtension @Inject constructor(val project: Project) {
     /**
      *
      * [Author]s of the extension
@@ -181,7 +181,7 @@ data class GithubData(
 }
 
 class Stubs(
-    extension: ProviderExtension,
+    extension: FlixclusiveProviderExtension,
     data: GithubData
 ) {
     private val cache = extension.userCache.resolve("provider-stubs")
@@ -195,10 +195,10 @@ class Stubs(
     }
 }
 
-fun ExtensionContainer.getFlixclusive(): ProviderExtension {
-    return getByName("provider") as ProviderExtension
+fun ExtensionContainer.getFlixclusive(): FlixclusiveProviderExtension {
+    return getByName("flxProvider") as FlixclusiveProviderExtension
 }
 
-fun ExtensionContainer.findFlixclusive(): ProviderExtension? {
-    return findByName("provider") as ProviderExtension?
+fun ExtensionContainer.findFlixclusive(): FlixclusiveProviderExtension? {
+    return findByName("flxProvider") as FlixclusiveProviderExtension?
 }
