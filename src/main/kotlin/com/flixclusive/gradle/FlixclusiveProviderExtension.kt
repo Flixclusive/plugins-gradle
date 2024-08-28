@@ -117,16 +117,16 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
      * Adds an author to the list of authors.
      *
      * @param name The name of the author.
-     * @param githubLink The optional link associated with the author's github profile.
+     * @param socialLink The optional link associated with the author's social.
      */
     fun author(
         name: String,
-        githubLink: String? = null
+        socialLink: String? = null
     ) {
         authors.add(
             Author(
                 name = name,
-                socialLink = githubLink
+                socialLink = socialLink
             )
         )
     }
