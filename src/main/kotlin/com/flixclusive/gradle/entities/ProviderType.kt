@@ -6,12 +6,21 @@ import kotlinx.serialization.Serializable
  * Represents the type of content the provider offers.
  *
  * @param type The provider type (e.g., "Movies", "TV Shows", or custom type).
+ *
+ * @see All
+ * @see Movies
+ * @see TvShows
  */
 @Serializable
 data class ProviderType(val type: String) {
     companion object {
+        /** Quick instance of [ProviderType] for providers that provide all content. */
         val All = ProviderType("Movies, TV Shows, etc.")
+
+        /** Quick instance of [ProviderType] for providers that provide movies. */
         val Movies = ProviderType("Movies")
+
+        /** Quick instance of [ProviderType] for providers that provide tv shows. */
         val TvShows = ProviderType("TV Shows")
     }
 

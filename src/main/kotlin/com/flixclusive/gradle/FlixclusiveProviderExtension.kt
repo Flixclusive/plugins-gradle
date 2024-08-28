@@ -126,7 +126,7 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
         authors.add(
             Author(
                 name = name,
-                githubLink = githubLink
+                socialLink = githubLink
             )
         )
     }
