@@ -29,6 +29,7 @@ import se.vidstige.jadb.JadbDevice
 import se.vidstige.jadb.JadbException
 import se.vidstige.jadb.RemoteFile
 import se.vidstige.jadb.Subprocess
+import java.io.File
 import java.nio.charset.StandardCharsets
 
 abstract class DeployWithAdbTask : DefaultTask() {
@@ -102,18 +103,48 @@ abstract class DeployWithAdbTask : DefaultTask() {
 
         val sanitizedFolderName = buildValidFilename(repositoryUrl)
 
-        val initialPath = if (isDebug) DEBUG_LOCAL_FILE_PATH else LOCAL_FILE_PATH
-        val providerPath = initialPath + "${sanitizedFolderName}/${providerFile.name}"
-        val updaterJsonPath = initialPath + "${sanitizedFolderName}/${updaterJson.name}"
-
-        device.push(providerFile, RemoteFile(providerPath))
-        device.push(updaterJson, RemoteFile(updaterJsonPath))
-        logger.lifecycle("${providerFile.nameWithoutExtension} have been pushed on $providerPath.")
+        try {
+            device.push(
+                files = listOf(providerFile, updaterJson),
+                sanitizedFolderName = sanitizedFolderName,
+                isDebug = isDebug
+            )
+        } catch (e: JadbException) {
+            device.push(
+                files = listOf(providerFile, updaterJson),
+                sanitizedFolderName = sanitizedFolderName,
+                isDebug = isDebug,
+                useOldStorage = true
+            )
+        }
 
         return true
     }
 
+    private fun JadbDevice.push(
+        files: List<File>,
+        sanitizedFolderName: String,
+        isDebug: Boolean,
+        useOldStorage: Boolean = false
+    ) {
+        val initialPath = when (useOldStorage) {
+            true -> if (isDebug) OLD_DEBUG_LOCAL_FILE_PATH else OLD_LOCAL_FILE_PATH
+            false -> if (isDebug) DEBUG_LOCAL_FILE_PATH else LOCAL_FILE_PATH
+        }
+
+        files.forEach { file ->
+            val remoteFilePath = "${initialPath}${sanitizedFolderName}/${file.name}"
+            push(file, RemoteFile(remoteFilePath))
+
+            val fileName = files.first().nameWithoutExtension
+            logger.lifecycle("$fileName have been pushed on $remoteFilePath.")
+        }
+    }
+
     companion object {
+        private const val OLD_DEBUG_LOCAL_FILE_PATH = "/sdcard/Android/data/com.flixclusive.debug/files/providers/"
+        private const val OLD_LOCAL_FILE_PATH = "/sdcard/Android/data/com.flixclusive/files/providers/"
+
         private const val DEBUG_LOCAL_FILE_PATH = "/storage/emulated/0/Android/data/com.flixclusive.debug/files/providers/"
         private const val LOCAL_FILE_PATH = "/storage/emulated/0/Android/data/com.flixclusive/files/providers/"
     }
