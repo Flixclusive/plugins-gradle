@@ -3,6 +3,7 @@ package com.flixclusive.gradle.util
 import com.flixclusive.gradle.entities.Language
 import com.flixclusive.gradle.entities.ProviderData
 import com.flixclusive.gradle.entities.ProviderManifest
+import com.flixclusive.gradle.entities.ProviderType
 import com.flixclusive.gradle.getFlixclusive
 import org.gradle.api.Project
 
@@ -39,7 +40,7 @@ fun Project.createProviderData(): ProviderData {
         repositoryUrl = extension.repositoryUrl.orNull,
         language = extension.language.getOrElse(Language(languageCode = "en")),
         iconUrl = extension.iconUrl.orNull,
-        providerType = extension.providerType.orNull,
+        providerType = extension.providerType.getOrElse(ProviderType(type = "Unknown")),
         changelog = extension.changelog.orNull
     )
 }
