@@ -68,10 +68,10 @@ abstract class CompileDexTask : DefaultTask() {
                         .also { closer.register(it) },
                     desugarClasspath = ClassFileProviderFactory(listOf<Path>()).also { closer.register(it) },
                     coreLibDesugarConfig = null,
-                    coreLibDesugarOutputKeepRuleFile = null,
+                    enableApiModeling = true,
                     messageReceiver = MessageReceiverImpl(
                         ErrorFormatMode.HUMAN_READABLE,
-                        LoggerFactory.getLogger(CompileDexTask::class.java)
+                        LoggerFactory.getLogger(CompileDexTask::class.java),
                     )
                 )
             )
@@ -85,8 +85,9 @@ abstract class CompileDexTask : DefaultTask() {
                     val files = classesInput.collect(Collectors.toList())
 
                     dexBuilder.convert(
-                        files.stream(),
-                        dexOutputDir.toPath()
+                        input = files.stream(),
+                        globalSyntheticsOutput = null,
+                        dexOutput = dexOutputDir.toPath()
                     )
 
                     for (file in files) {

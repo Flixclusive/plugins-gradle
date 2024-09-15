@@ -1,9 +1,9 @@
 package com.flixclusive.gradle.util
 
-import com.flixclusive.gradle.entities.Language
-import com.flixclusive.gradle.entities.ProviderData
-import com.flixclusive.gradle.entities.ProviderManifest
-import com.flixclusive.gradle.entities.ProviderType
+import com.flixclusive.model.provider.Language
+import com.flixclusive.model.provider.ProviderData
+import com.flixclusive.model.provider.ProviderManifest
+import com.flixclusive.model.provider.ProviderType
 import com.flixclusive.gradle.getFlixclusive
 import org.gradle.api.Project
 

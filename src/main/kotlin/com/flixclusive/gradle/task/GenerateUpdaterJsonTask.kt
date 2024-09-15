@@ -15,7 +15,7 @@
 
 package com.flixclusive.gradle.task
 
-import com.flixclusive.gradle.entities.ProviderData
+import com.flixclusive.model.provider.ProviderData
 import com.flixclusive.gradle.findFlixclusive
 import com.flixclusive.gradle.util.createProviderData
 import groovy.json.JsonBuilder

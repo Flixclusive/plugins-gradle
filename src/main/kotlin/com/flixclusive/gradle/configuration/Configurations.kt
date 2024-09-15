@@ -21,7 +21,7 @@ fun registerConfigurations(project: Project) {
     val getStubsConfiguration = GetProviderStubsConfigurationProvider()
 
     project.configurations.register(getStubsConfiguration.name) {
-        it.isTransitive = false
+        isTransitive = false
     }
 
     project.afterEvaluate {

@@ -15,11 +15,11 @@
 
 package com.flixclusive.gradle
 
-import com.flixclusive.gradle.entities.Author
-import com.flixclusive.gradle.entities.Language
-import com.flixclusive.gradle.entities.ProviderType
-import com.flixclusive.gradle.entities.Repository.Companion.toValidRepositoryLink
-import com.flixclusive.gradle.entities.Status
+import com.flixclusive.model.provider.Author
+import com.flixclusive.model.provider.Language
+import com.flixclusive.model.provider.ProviderType
+import com.flixclusive.model.provider.Repository.Companion.toValidRepositoryLink
+import com.flixclusive.model.provider.Status
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.plugins.ExtensionContainer

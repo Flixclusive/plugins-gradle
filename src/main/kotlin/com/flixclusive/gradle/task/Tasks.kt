@@ -27,7 +27,7 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-const val TASK_GROUP = "aliucord"
+const val TASK_GROUP = "flixclusive"
 
 fun registerTasks(project: Project) {
     val extension = project.extensions.getFlixclusive()
@@ -35,56 +35,56 @@ fun registerTasks(project: Project) {
 
     if (project.rootProject.tasks.findByName("generateUpdaterJson") == null) {
         project.rootProject.tasks.register("generateUpdaterJson", GenerateUpdaterJsonTask::class.java) {
-            it.group = TASK_GROUP
+            group = TASK_GROUP
 
-            it.outputs.upToDateWhen { false }
+            outputs.upToDateWhen { false }
 
-            it.outputFile.set(it.project.buildDir.resolve("updater.json"))
+            outputFile.set(project.buildDir.resolve("updater.json"))
         }
     }
 
     val providerClassFile = intermediates.resolve("providerClass")
 
     val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) {
-        it.group = TASK_GROUP
+        group = TASK_GROUP
 
-        it.providerClassFile.set(providerClassFile)
+        this@register.providerClassFile.set(providerClassFile)
 
         // Doing this since KotlinCompile does not inherit AbstractCompile no more.
         val compileKotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
         if (compileKotlinTask != null) {
-            it.dependsOn(compileKotlinTask)
-            it.input.from(compileKotlinTask.destinationDirectory)
+            dependsOn(compileKotlinTask)
+            input.from(compileKotlinTask.destinationDirectory)
         }
 
         val compileJavaWithJavac = project.tasks.findByName("compileDebugJavaWithJavac") as AbstractCompile?
         if (compileJavaWithJavac != null) {
-            it.dependsOn(compileJavaWithJavac)
-            it.input.from(compileJavaWithJavac.destinationDirectory)
+            dependsOn(compileJavaWithJavac)
+            input.from(compileJavaWithJavac.destinationDirectory)
         }
 
-        it.outputFile.set(intermediates.resolve("classes.dex"))
+        outputFile.set(intermediates.resolve("classes.dex"))
     }
 
     val compileResources = project.tasks.register("compileResources", CompileResourcesTask::class.java) {
-        it.group = TASK_GROUP
+        group = TASK_GROUP
 
         val processManifestTask = project.tasks.getByName("processDebugManifest") as ProcessLibraryManifest
-        it.dependsOn(processManifestTask)
+        dependsOn(processManifestTask)
 
         val android = project.extensions.getByName("android") as BaseExtension
-        it.input.set(android.sourceSets.getByName("main").res.srcDirs.single())
-        it.manifestFile.set(processManifestTask.manifestOutputFile)
+        input.set(android.sourceSets.getByName("main").res.srcDirs.single())
+        manifestFile.set(processManifestTask.manifestOutputFile)
 
-        it.outputFile.set(intermediates.resolve("res.apk"))
+        outputFile.set(intermediates.resolve("res.apk"))
 
-        it.doLast { _ ->
-            val resApkFile = it.outputFile.asFile.get()
+        doLast {
+            val resApkFile = outputFile.asFile.get()
 
             if (resApkFile.exists()) {
-                project.tasks.named("make", AbstractCopyTask::class.java) { makeTask ->
-                    makeTask.from(project.zipTree(resApkFile)) { copySpec ->
-                        copySpec.exclude("AndroidManifest.xml")
+                project.tasks.named("make", AbstractCopyTask::class.java) {
+                    from(project.zipTree(resApkFile)) {
+                        exclude("AndroidManifest.xml")
                     }
                 }
             }
@@ -93,14 +93,14 @@ fun registerTasks(project: Project) {
 
     project.afterEvaluate {
         val make = project.tasks.register("make", Zip::class.java) {
-            it.group = TASK_GROUP
+            group = TASK_GROUP
             val compileDexTask = compileDex.get()
-            it.dependsOn(compileDexTask)
+            dependsOn(compileDexTask)
 
             val manifestFile = intermediates.resolve("manifest.json")
 
-            it.from(manifestFile)
-            it.doFirst {
+            from(manifestFile)
+            doFirst {
                 val (versionCode, _) = extension.getVersionDetails()
                 require(versionCode > 0L) {
                     "No version is set"
@@ -126,33 +126,32 @@ fun registerTasks(project: Project) {
                 )
             }
 
-            it.from(compileDexTask.outputFile)
+            from(compileDexTask.outputFile)
 
-            val zip = it as Zip
             if (extension.requiresResources.get()) {
-                zip.dependsOn(compileResources.get())
+                dependsOn(compileResources.get())
             }
 
-            zip.isPreserveFileTimestamps = false
-            zip.archiveBaseName.set(project.name)
-            zip.archiveExtension.set("flx")
-            zip.archiveVersion.set("")
-            zip.destinationDirectory.set(project.buildDir)
+            isPreserveFileTimestamps = false
+            archiveBaseName.set(project.name)
+            archiveExtension.set("flx")
+            archiveVersion.set("")
+            destinationDirectory.set(project.buildDir)
 
-            it.doLast { task ->
-                task.logger.lifecycle("Made Flixclusive package at ${task.outputs.files.singleFile}")
+            doLast {
+                logger.lifecycle("Made Flixclusive package at ${outputs.files.singleFile}")
             }
         }
 
         project.rootProject.tasks.getByName("generateUpdaterJson").dependsOn(make)
         project.tasks.register("deployWithAdb", DeployWithAdbTask::class.java) {
-            it.group = TASK_GROUP
-            it.dependsOn("make")
-            it.dependsOn(":generateUpdaterJson")
+            group = TASK_GROUP
+            dependsOn("make")
+            dependsOn(":generateUpdaterJson")
         }
 
         project.tasks.register("cleanCache", CleanCacheTask::class.java) {
-            it.group = TASK_GROUP
+            group = TASK_GROUP
         }
     }
 }

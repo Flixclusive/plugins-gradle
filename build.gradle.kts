@@ -1,36 +1,43 @@
-plugins {
-    kotlin("jvm") version "1.9.10"
-    id("java-gradle-plugin")
-    id("maven-publish")
-    kotlin("plugin.serialization") version "1.9.10"
-}
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-group = "com.flixclusive"
+plugins {
+    `kotlin-dsl`
+    id("maven-publish")
+}
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
-repositories {
-    mavenCentral()
-    google()
-    maven("https://jitpack.io")
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17.toString()
+    }
+}
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+        mavenLocal()
+    }
 }
 
 dependencies {
     implementation(kotlin("stdlib", kotlin.coreLibrariesVersion))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     compileOnly(gradleApi())
 
     compileOnly("com.google.guava:guava:30.1.1-jre")
     compileOnly("com.android.tools:sdk-common:31.0.0")
-    compileOnly("com.android.tools.build:gradle:7.2.2")
+    compileOnly("com.android.tools.build:gradle:8.2.0")
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10")
 
     implementation("org.ow2.asm:asm:9.4")
     implementation("org.ow2.asm:asm-tree:9.4")
     implementation("com.github.vidstige:jadb:master-SNAPSHOT")
+    implementation("com.github.flixclusiveorg.core-stubs:model-provider:1.0.3")
 }
 
 gradlePlugin {
@@ -46,6 +53,9 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
     archiveClassifier.set("sources")
     from("src/main/kotlin")
 }
+
+group = "com.github.flixclusive"
+version = "1.0.0"
 
 publishing {
     repositories {
