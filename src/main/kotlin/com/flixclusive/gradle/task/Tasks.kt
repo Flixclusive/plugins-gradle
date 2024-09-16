@@ -17,8 +17,10 @@ package com.flixclusive.gradle.task
 
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessLibraryManifest
+import com.flixclusive.gradle.FlixclusiveProviderExtension
 import com.flixclusive.gradle.getFlixclusive
 import com.flixclusive.gradle.util.createProviderManifest
+import com.flixclusive.gradle.util.isValidFilename
 import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
 import org.gradle.api.Project
@@ -132,14 +134,22 @@ fun registerTasks(project: Project) {
                 dependsOn(compileResources.get())
             }
 
+
+            val flxProvider = project.extensions.getByName("flxProvider") as FlixclusiveProviderExtension
+            val projectName = flxProvider.providerName.get()
+
+            if (!isValidFilename(projectName)) {
+                throw IllegalStateException("Invalid project name: $projectName")
+            }
+
             isPreserveFileTimestamps = false
-            archiveBaseName.set(project.name)
+            archiveBaseName.set(projectName)
             archiveExtension.set("flx")
             archiveVersion.set("")
             destinationDirectory.set(project.buildDir)
 
             doLast {
-                logger.lifecycle("Made Flixclusive package at ${outputs.files.singleFile}")
+                logger.lifecycle("Provider package ${projectName}.flx created at ${outputs.files.singleFile}")
             }
         }
 
