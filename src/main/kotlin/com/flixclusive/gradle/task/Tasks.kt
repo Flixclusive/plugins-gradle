@@ -41,7 +41,7 @@ fun registerTasks(project: Project) {
 
             outputs.upToDateWhen { false }
 
-            outputFile.set(project.buildDir.resolve("updater.json"))
+            outputFile.set(this.project.buildDir.resolve("updater.json"))
         }
     }
 
