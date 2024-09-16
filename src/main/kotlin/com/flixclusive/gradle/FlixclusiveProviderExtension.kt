@@ -60,6 +60,10 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
 
     internal var providerClassName: String? = null
 
+    /** The name of the provider. Defaults to the project name - [Project.getName]. */
+    val providerName: Property<String> = project.objects.property(String::class.java)
+        .convention(project.name)
+
     /** Determines whether the provider is an adult-only provider. Defaults to false. */
     val adult: Property<Boolean> = project.objects.property(Boolean::class.java)
         .convention(false)

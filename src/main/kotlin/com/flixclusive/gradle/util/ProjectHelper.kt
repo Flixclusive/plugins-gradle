@@ -34,7 +34,7 @@ fun Project.createProviderData(): ProviderData {
         status = extension.status.get(),
         versionName = versionName,
         versionCode = versionCode,
-        name = name,
+        name = extension.providerName.get(),
         adult = extension.adult.get(),
         authors = extension.authors.getOrElse(emptyList()),
         description = extension.description.orNull,
