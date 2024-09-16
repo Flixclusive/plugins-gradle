@@ -60,6 +60,10 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
 
     internal var providerClassName: String? = null
 
+    /** Determines whether the provider is an adult-only provider. Defaults to false. */
+    val adult: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .convention(false)
+
     /** The provider's description */
     val description: Property<String> = project.objects.property(String::class.java)
     /**
@@ -89,12 +93,12 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
      */
     val providerType: Property<ProviderType> = project.objects.property(ProviderType::class.java)
     /**
-     * Toggle this if this provider has its own resources.
+     * Toggle this if this provider has its own resources. Defaults to false.
      */
     val requiresResources: Property<Boolean> = project.objects.property(Boolean::class.java)
         .convention(false)
     /**
-     * The current status of this provider.
+     * The current status of this provider. Defaults to Beta.
      *
      * These are the possible values you could set:
      * - Status.Beta
@@ -108,7 +112,7 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
     /**
      *
      * Excludes this provider from the updater, meaning it won't show up for users.
-     * Set this if the provider is still on beta.
+     * Set this if the provider is still on beta. Defaults to false.
      * */
     val excludeFromUpdaterJson: Property<Boolean> =
         project.objects.property(Boolean::class.java).convention(false)
