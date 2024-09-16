@@ -28,6 +28,8 @@ import org.gradle.api.provider.Property
 import java.net.URL
 import javax.inject.Inject
 
+internal const val APK_STUBS_DEPRECATED_MESSAGE = "This class is deprecated. See https://github.com/flixclusiveorg/core-stubs for more details."
+
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 abstract class FlixclusiveProviderExtension @Inject constructor(val project: Project) {
     /**
@@ -52,6 +54,7 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
      * */
     val changelog: Property<String> = project.objects.property(String::class.java)
 
+    @Deprecated(APK_STUBS_DEPRECATED_MESSAGE)
     var stubs: Stubs? = null
         internal set
 
@@ -110,6 +113,7 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
     val excludeFromUpdaterJson: Property<Boolean> =
         project.objects.property(Boolean::class.java).convention(false)
 
+    @Deprecated(APK_STUBS_DEPRECATED_MESSAGE)
     val userCache = project.gradle.gradleUserHomeDir
         .resolve("caches")
 
@@ -161,6 +165,7 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
     }
 }
 
+@Deprecated(APK_STUBS_DEPRECATED_MESSAGE)
 data class GithubData(
     val owner: String,
     val repository: String,
@@ -171,6 +176,7 @@ data class GithubData(
         private const val DEFAULT_GITHUB_REPOSITORY = "Flixclusive"
         private const val DEFAULT_GITHUB_RELEASE_TAG = "pre-release"
 
+        @Deprecated(APK_STUBS_DEPRECATED_MESSAGE)
         fun Dependency.toGithubData(): GithubData
             = GithubData(
                 owner = group ?: DEFAULT_GITHUB_REPOSITORY_OWNER,
@@ -180,6 +186,8 @@ data class GithubData(
     }
 }
 
+
+@Deprecated(APK_STUBS_DEPRECATED_MESSAGE)
 class Stubs(
     extension: FlixclusiveProviderExtension,
     data: GithubData

@@ -15,6 +15,7 @@
 
 package com.flixclusive.gradle.configuration
 
+import com.flixclusive.gradle.APK_STUBS_DEPRECATED_MESSAGE
 import com.flixclusive.gradle.GithubData.Companion.toGithubData
 import com.flixclusive.gradle.createProgressLogger
 import com.flixclusive.gradle.download
@@ -23,6 +24,8 @@ import com.flixclusive.gradle.getFlixclusive
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 
+
+@Deprecated(APK_STUBS_DEPRECATED_MESSAGE)
 class GetProviderStubsConfigurationProvider : IConfigurationProvider {
 
     override val name: String
