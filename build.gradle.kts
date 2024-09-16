@@ -37,7 +37,7 @@ dependencies {
     implementation("org.ow2.asm:asm:9.4")
     implementation("org.ow2.asm:asm-tree:9.4")
     implementation("com.github.vidstige:jadb:master-SNAPSHOT")
-    implementation("com.github.flixclusiveorg.core-stubs:model-provider:1.0.3")
+    implementation("com.github.flixclusiveorg.core-stubs:model-provider:1.0.4")
 }
 
 gradlePlugin {
