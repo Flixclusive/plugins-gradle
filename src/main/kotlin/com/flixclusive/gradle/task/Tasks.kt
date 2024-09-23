@@ -17,17 +17,25 @@ package com.flixclusive.gradle.task
 
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessLibraryManifest
+import com.android.builder.dexing.ClassFileInputs
+import com.flixclusive.gradle.FLX_PROVIDER_EXTENSION_NAME
 import com.flixclusive.gradle.FlixclusiveProviderExtension
 import com.flixclusive.gradle.getFlixclusive
+import com.flixclusive.gradle.util.AndroidProjectType
 import com.flixclusive.gradle.util.createProviderManifest
+import com.flixclusive.gradle.util.findProviderClassName
+import com.flixclusive.gradle.util.getAndroidProjectType
 import com.flixclusive.gradle.util.isValidFilename
 import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
 import org.gradle.api.Project
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Arrays
+import java.util.stream.Collectors
 
 const val TASK_GROUP = "flixclusive"
 
@@ -93,26 +101,86 @@ fun registerTasks(project: Project) {
         }
     }
 
+    val androidManifestPath = project.file("src/main/AndroidManifest.xml")
+    val generateAndroidManifest = project.tasks.register("generateAndroidManifest") {
+        androidManifestPath.writeText("""
+            <?xml version="1.0" encoding="utf-8"?>
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application
+                    android:allowBackup="true"
+                    android:label="Flixclusive Provider"
+                    android:supportsRtl="true">
+                    
+                    <!-- This is a fake/mimic AndroidManifest.xml needed for compiling this provider - do NOT delete! -->
+                    
+                </application>
+            </manifest>
+        """.trimIndent())
+    }
+
     project.afterEvaluate {
         val make = project.tasks.register("make", Zip::class.java) {
             group = TASK_GROUP
-            val compileDexTask = compileDex.get()
-            dependsOn(compileDexTask)
 
-            val manifestFile = intermediates.resolve("manifest.json")
+            val generateAndroidManifestTask = generateAndroidManifest.get()
 
-            from(manifestFile)
+            val compileKotlinTask = project.tasks.findByName("compileDebugKotlin") as KotlinCompile?
+
+            when (project.getAndroidProjectType()) {
+                AndroidProjectType.APPLICATION -> {
+                    dependsOn(generateAndroidManifestTask)
+
+                    val assembleTask = project.tasks.getByName("assembleDebug")
+                    dependsOn(assembleTask)
+
+                    val apkFile = project.file("build/outputs/apk/debug/${project.name}-debug.apk")
+                    from(project.zipTree(apkFile)) {
+                        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+                    }
+                }
+                AndroidProjectType.LIBRARY -> {
+                    val compileDexTask = compileDex.get()
+                    dependsOn(compileDexTask)
+
+                    from(compileDexTask.outputFile)
+
+                    if (extension.requiresResources.get()) {
+                        dependsOn(compileResources.get())
+                    }
+                }
+                AndroidProjectType.UNKNOWN -> throw IllegalStateException("Non-android providers are not supported YET!")
+            }
+
             doFirst {
+                val manifestFile = intermediates.resolve("manifest.json")
+                from(manifestFile)
+
                 val (versionCode, _) = extension.getVersionDetails()
                 require(versionCode > 0L) {
                     "No version is set"
                 }
 
-                if (extension.providerClassName == null) {
-                    if (providerClassFile.exists()) {
-                        extension.providerClassName = providerClassFile.readText()
-                    }
+                if (project.getAndroidProjectType() == AndroidProjectType.APPLICATION && compileKotlinTask != null) {
+                    val fileStreams = compileKotlinTask.destinationDirectory.asFile.get().listFiles()
+                        ?.map { input ->
+                            ClassFileInputs.fromPath(input.toPath())
+                                .use { it.entries { _, _ -> true } }
+                        }?.toTypedArray()
+
+                    logger.lifecycle("Finding annotated provider class...")
+                    Arrays.stream(fileStreams).flatMap { it }
+                        .use { classesInput ->
+                            val files = classesInput.collect(Collectors.toList())
+                            val className = findProviderClassName(files)
+                            if (className != null) {
+                                logger.lifecycle("Annotated provider class: $className")
+                                extension.providerClassName = className
+                            }
+                        }
+                } else if (project.getAndroidProjectType() == AndroidProjectType.LIBRARY && extension.providerClassName == null && providerClassFile.exists()) {
+                    extension.providerClassName = providerClassFile.readText()
                 }
+
 
                 require(extension.providerClassName != null) {
                     "No provider class found, make sure your provider class is annotated with @FlixclusiveProvider"
@@ -128,14 +196,7 @@ fun registerTasks(project: Project) {
                 )
             }
 
-            from(compileDexTask.outputFile)
-
-            if (extension.requiresResources.get()) {
-                dependsOn(compileResources.get())
-            }
-
-
-            val flxProvider = project.extensions.getByName("flxProvider") as FlixclusiveProviderExtension
+            val flxProvider = project.extensions.getByName(FLX_PROVIDER_EXTENSION_NAME) as FlixclusiveProviderExtension
             val projectName = flxProvider.providerName.get()
 
             if (!isValidFilename(projectName)) {
@@ -149,14 +210,19 @@ fun registerTasks(project: Project) {
             destinationDirectory.set(project.buildDir)
 
             doLast {
+                if (androidManifestPath.exists()) {
+                    androidManifestPath.delete()
+                }
+
                 logger.lifecycle("Provider package ${projectName}.flx created at ${outputs.files.singleFile}")
             }
         }
 
-        project.rootProject.tasks.getByName("generateUpdaterJson").dependsOn(make)
+        project.rootProject.tasks.getByName("generateUpdaterJson")
+            .dependsOn(make.get())
         project.tasks.register("deployWithAdb", DeployWithAdbTask::class.java) {
             group = TASK_GROUP
-            dependsOn("make")
+            dependsOn(make.get())
             dependsOn(":generateUpdaterJson")
         }
 

@@ -23,17 +23,20 @@ import com.android.builder.dexing.DexArchiveBuilder
 import com.android.builder.dexing.DexParameters
 import com.android.builder.dexing.r8.ClassFileProviderFactory
 import com.flixclusive.gradle.getFlixclusive
+import com.flixclusive.gradle.util.findProviderClassName
 import com.google.common.io.Closer
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.*
-import org.objectweb.asm.ClassReader
-import org.objectweb.asm.tree.ClassNode
+import org.gradle.api.tasks.IgnoreEmptyDirectories
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.SkipWhenEmpty
+import org.gradle.api.tasks.TaskAction
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Path
-import java.util.*
+import java.util.Arrays
 import java.util.stream.Collectors
 
 abstract class CompileDexTask : DefaultTask() {
@@ -90,30 +93,10 @@ abstract class CompileDexTask : DefaultTask() {
                         dexOutput = dexOutputDir.toPath()
                     )
 
-                    for (file in files) {
-                        val reader = ClassReader(file.readAllBytes())
-
-                        val classNode = ClassNode()
-                        reader.accept(classNode, 0)
-
-                        for (annotation in classNode.visibleAnnotations.orEmpty() + classNode.invisibleAnnotations.orEmpty()) {
-                            if (annotation.desc == "Lcom/flixclusive/provider/FlixclusiveProvider;") {
-                                val flixclusive = project.extensions.getFlixclusive()
-
-                                require(flixclusive.providerClassName == null) {
-                                    "Only 1 active provider class per project is supported"
-                                }
-
-                                for (method in classNode.methods) {
-                                    if (method.name == "getManifest" && method.desc == "()Lcom/flixclusive/provider/ProviderManifest;") {
-                                        throw IllegalArgumentException("Provider class cannot override getManifest, use manifest.json system!")
-                                    }
-                                }
-
-                                flixclusive.providerClassName = classNode.name.replace('/', '.')
-                                    .also { providerClassFile.asFile.orNull?.writeText(it) }
-                            }
-                        }
+                    val className = project.findProviderClassName(files = files)
+                    if (className != null) {
+                        extensions.getFlixclusive().providerClassName = className
+                        providerClassFile.asFile.orNull?.writeText(className)
                     }
                 }
         }

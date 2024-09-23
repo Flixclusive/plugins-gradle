@@ -42,9 +42,13 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        create("com.flixclusive.gradle") {
-            id = "com.flixclusive.gradle"
-            implementationClass = "com.flixclusive.gradle.FlixclusiveProvider"
+        register("flixclusiveProvider") {
+            id = "flixclusive.provider"
+            implementationClass = "FlixclusiveProviderLibraryPlugin"
+        }
+        register("flixclusiveProviderApp") {
+            id = "flixclusive.provider.app"
+            implementationClass = "FlixclusiveProviderAppPlugin"
         }
     }
 }
@@ -55,7 +59,7 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
 }
 
 group = "com.github.flixclusive"
-version = "1.1.4"
+version = "1.2.0"
 
 publishing {
     repositories {

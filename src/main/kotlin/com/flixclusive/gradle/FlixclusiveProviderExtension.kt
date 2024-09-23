@@ -30,6 +30,8 @@ import javax.inject.Inject
 
 internal const val APK_STUBS_DEPRECATED_MESSAGE = "This class is deprecated. See https://github.com/flixclusiveorg/core-stubs for more details."
 
+const val FLX_PROVIDER_EXTENSION_NAME = "flxProvider"
+
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 abstract class FlixclusiveProviderExtension @Inject constructor(val project: Project) {
     /**
@@ -215,9 +217,9 @@ class Stubs(
 }
 
 fun ExtensionContainer.getFlixclusive(): FlixclusiveProviderExtension {
-    return getByName("flxProvider") as FlixclusiveProviderExtension
+    return getByName(FLX_PROVIDER_EXTENSION_NAME) as FlixclusiveProviderExtension
 }
 
 fun ExtensionContainer.findFlixclusive(): FlixclusiveProviderExtension? {
-    return findByName("flxProvider") as FlixclusiveProviderExtension?
+    return findByName(FLX_PROVIDER_EXTENSION_NAME) as FlixclusiveProviderExtension?
 }
