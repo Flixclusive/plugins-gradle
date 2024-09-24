@@ -13,30 +13,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.android.build.api.dsl.ApplicationExtension
-import com.flixclusive.gradle.FLX_PROVIDER_EXTENSION_NAME
-import com.flixclusive.gradle.FlixclusiveProviderExtension
+package com.flixclusive.gradle
+
 import com.flixclusive.gradle.configuration.registerConfigurations
 import com.flixclusive.gradle.task.registerTasks
-import com.flixclusive.gradle.util.configureAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.configure
 
 @Suppress("unused")
-class FlixclusiveProviderAppPlugin : Plugin<Project> {
+abstract class FlixclusiveProvider : Plugin<Project> {
     override fun apply(project: Project) {
-        with(project) {
-            with(pluginManager) {
-                apply("com.android.application")
-            }
-
-            extensions.create(FLX_PROVIDER_EXTENSION_NAME, FlixclusiveProviderExtension::class.java, project)
-
-            extensions.configure<ApplicationExtension> {
-                configureAndroid(commonExtension = this@configure)
-            }
-        }
+        project.extensions.create("flxProvider", FlixclusiveProviderExtension::class.java, project)
 
         registerTasks(project)
         registerConfigurations(project)

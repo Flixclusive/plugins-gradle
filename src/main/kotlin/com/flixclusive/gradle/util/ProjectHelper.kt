@@ -1,14 +1,11 @@
 package com.flixclusive.gradle.util
 
-import com.android.builder.dexing.ClassFileEntry
 import com.flixclusive.model.provider.Language
 import com.flixclusive.model.provider.ProviderData
 import com.flixclusive.model.provider.ProviderManifest
 import com.flixclusive.model.provider.ProviderType
 import com.flixclusive.gradle.getFlixclusive
 import org.gradle.api.Project
-import org.objectweb.asm.ClassReader
-import org.objectweb.asm.tree.ClassNode
 
 fun Project.createProviderManifest(): ProviderManifest {
     val extension = this.extensions.getFlixclusive()
@@ -47,33 +44,4 @@ fun Project.createProviderData(): ProviderData {
         providerType = extension.providerType.getOrElse(ProviderType(type = "Unknown")),
         changelog = extension.changelog.orNull
     )
-}
-
-fun Project.findProviderClassName(files: List<ClassFileEntry>): String? {
-    for (file in files) {
-        val reader = ClassReader(file.readAllBytes())
-
-        val classNode = ClassNode()
-        reader.accept(classNode, 0)
-
-        for (annotation in classNode.visibleAnnotations.orEmpty() + classNode.invisibleAnnotations.orEmpty()) {
-            if (annotation.desc == "Lcom/flixclusive/provider/FlixclusiveProvider;") {
-                val flixclusive = project.extensions.getFlixclusive()
-
-                require(flixclusive.providerClassName == null) {
-                    "Only 1 active provider class per project is supported"
-                }
-
-                for (method in classNode.methods) {
-                    if (method.name == "getManifest" && method.desc == "()Lcom/flixclusive/provider/ProviderManifest;") {
-                        throw IllegalArgumentException("Provider class cannot override getManifest, use manifest.json system!")
-                    }
-                }
-
-                return classNode.name.replace('/', '.')
-            }
-        }
-    }
-
-    return null
 }
