@@ -21,14 +21,13 @@ import com.flixclusive.model.provider.ProviderType
 import com.flixclusive.model.provider.Repository.Companion.toValidRepositoryLink
 import com.flixclusive.model.provider.Status
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Dependency
 import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import java.net.URL
 import javax.inject.Inject
 
 internal const val APK_STUBS_DEPRECATED_MESSAGE = "This class is deprecated. See https://github.com/flixclusiveorg/core-stubs for more details."
+const val FLX_PROVIDER_EXTENSION_NAME = "flxProvider"
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 abstract class FlixclusiveProviderExtension @Inject constructor(val project: Project) {
@@ -53,10 +52,6 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
      * Changelogs of the provider
      * */
     val changelog: Property<String> = project.objects.property(String::class.java)
-
-    @Deprecated(APK_STUBS_DEPRECATED_MESSAGE)
-    var stubs: Stubs? = null
-        internal set
 
     internal var providerClassName: String? = null
 
@@ -176,48 +171,11 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
     }
 }
 
-@Deprecated(APK_STUBS_DEPRECATED_MESSAGE)
-data class GithubData(
-    val owner: String,
-    val repository: String,
-    val tag: String,
-) {
-    companion object {
-        private const val DEFAULT_GITHUB_REPOSITORY_OWNER = "rhenwinch"
-        private const val DEFAULT_GITHUB_REPOSITORY = "Flixclusive"
-        private const val DEFAULT_GITHUB_RELEASE_TAG = "pre-release"
-
-        @Deprecated(APK_STUBS_DEPRECATED_MESSAGE)
-        fun Dependency.toGithubData(): GithubData
-            = GithubData(
-                owner = group ?: DEFAULT_GITHUB_REPOSITORY_OWNER,
-                repository = name ?: DEFAULT_GITHUB_REPOSITORY,
-                tag = version ?: DEFAULT_GITHUB_RELEASE_TAG,
-            )
-    }
-}
-
-
-@Deprecated(APK_STUBS_DEPRECATED_MESSAGE)
-class Stubs(
-    extension: FlixclusiveProviderExtension,
-    data: GithubData
-) {
-    private val cache = extension.userCache.resolve("provider-stubs")
-
-    val githubAarDownloadUrl =
-        URL("https://github.com/${data.owner}/${data.repository}/releases/download/${data.tag}/provider-stubs.aar")
-    val file = cache.resolve("provider-stubs.aar")
-
-    init {
-        cache.mkdirs()
-    }
-}
 
 fun ExtensionContainer.getFlixclusive(): FlixclusiveProviderExtension {
-    return getByName("flxProvider") as FlixclusiveProviderExtension
+    return getByName(FLX_PROVIDER_EXTENSION_NAME) as FlixclusiveProviderExtension
 }
 
 fun ExtensionContainer.findFlixclusive(): FlixclusiveProviderExtension? {
-    return findByName("flxProvider") as FlixclusiveProviderExtension?
+    return findByName(FLX_PROVIDER_EXTENSION_NAME) as FlixclusiveProviderExtension?
 }

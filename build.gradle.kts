@@ -16,15 +16,6 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url = uri("https://jitpack.io") }
-        mavenLocal()
-    }
-}
-
 dependencies {
     implementation(kotlin("stdlib", kotlin.coreLibrariesVersion))
     compileOnly(gradleApi())
@@ -34,6 +25,7 @@ dependencies {
     compileOnly("com.android.tools.build:gradle:8.2.0")
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10")
 
+    implementation("com.github.johnrengelman:shadow:8.1.0")
     implementation("org.ow2.asm:asm:9.4")
     implementation("org.ow2.asm:asm-tree:9.4")
     implementation("com.github.vidstige:jadb:master-SNAPSHOT")
@@ -42,9 +34,9 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        create("com.flixclusive.gradle") {
-            id = "com.flixclusive.gradle"
-            implementationClass = "com.flixclusive.gradle.FlixclusiveProvider"
+        register("flixclusiveProvider") {
+            id = "flx-provider"
+            implementationClass = "FlixclusiveProvider"
         }
     }
 }
@@ -55,7 +47,7 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
 }
 
 group = "com.github.flixclusive"
-version = "1.1.4"
+version = "1.2.1"
 
 publishing {
     repositories {

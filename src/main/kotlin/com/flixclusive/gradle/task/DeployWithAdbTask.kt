@@ -32,7 +32,7 @@ import se.vidstige.jadb.Subprocess
 import java.io.File
 import java.nio.charset.StandardCharsets
 
-abstract class DeployWithAdbTask : DefaultTask() {
+internal abstract class DeployWithAdbTask : DefaultTask() {
     @get:Input
     @set:Option(option = "wait-for-debugger", description = "Enables debugging flag when starting the main activity")
     var waitForDebugger: Boolean = false

@@ -18,8 +18,13 @@ package com.flixclusive.gradle.configuration
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 
-internal interface IConfigurationProvider {
-    val name: String
+internal const val FAT_IMPLEMENTATION = "fatImplementation"
 
-    fun provide(project: Project, dependency: Dependency)
+internal class FatImplementationProvider : IConfigurationProvider {
+    override val name: String
+        get() = FAT_IMPLEMENTATION
+
+    override fun provide(project: Project, dependency: Dependency) {
+        project.dependencies.add("compileOnly", dependency)
+    }
 }

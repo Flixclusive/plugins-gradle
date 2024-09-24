@@ -17,23 +17,28 @@ package com.flixclusive.gradle.task
 
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessLibraryManifest
+import com.flixclusive.gradle.FLX_PROVIDER_EXTENSION_NAME
 import com.flixclusive.gradle.FlixclusiveProviderExtension
+import com.flixclusive.gradle.configuration.FAT_IMPLEMENTATION
 import com.flixclusive.gradle.getFlixclusive
 import com.flixclusive.gradle.util.createProviderManifest
 import com.flixclusive.gradle.util.isValidFilename
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
 import org.gradle.api.Project
 import org.gradle.api.tasks.AbstractCopyTask
+import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-const val TASK_GROUP = "flixclusive"
+private const val TASK_GROUP = "flixclusive"
 
-fun registerTasks(project: Project) {
+internal fun registerTasks(project: Project) {
     val extension = project.extensions.getFlixclusive()
     val intermediates = project.buildDir.resolve("intermediates")
+    val compiledDependenciesDir = intermediates.resolve("compiled_dependencies/")
 
     if (project.rootProject.tasks.findByName("generateUpdaterJson") == null) {
         project.rootProject.tasks.register("generateUpdaterJson", GenerateUpdaterJsonTask::class.java) {
@@ -46,6 +51,43 @@ fun registerTasks(project: Project) {
     }
 
     val providerClassFile = intermediates.resolve("providerClass")
+
+    val compileRequiredDependencies = project.tasks.register("compileRequiredDependencies", ShadowJar::class.java) {
+        logger.lifecycle("Compiling required dependencies...")
+
+        group = TASK_GROUP
+
+        exclude("*.aar")
+        exclude("*.bin")
+        exclude("META-INF/**")
+        dependencies {
+            exclude(dependency("com.github.flixclusive.*:provider:.*"))
+            exclude("META-INF/**")
+        }
+
+        configurations = listOf(
+            project.configurations.getByName(FAT_IMPLEMENTATION)
+        )
+
+        archiveBaseName.set("dependencies")
+        archiveClassifier.set("")
+        archiveVersion.set("")
+    }
+
+    val extractRequiredDependencies = project.tasks.register("extractRequiredDependencies", Copy::class.java) {
+        group = TASK_GROUP
+
+        val compileRequiredDependenciesTask = compileRequiredDependencies.get()
+        dependsOn(compileRequiredDependenciesTask)
+
+        if (!compiledDependenciesDir.exists()) {
+            compiledDependenciesDir.mkdirs()
+        }
+
+        val jarFile = compileRequiredDependenciesTask.outputs.files.singleFile
+        from(project.zipTree(jarFile))
+        into(compiledDependenciesDir)
+    }
 
     val compileDex = project.tasks.register("compileDex", CompileDexTask::class.java) {
         group = TASK_GROUP
@@ -65,7 +107,15 @@ fun registerTasks(project: Project) {
             input.from(compileJavaWithJavac.destinationDirectory)
         }
 
+        val extractRequiredDependenciesTask = extractRequiredDependencies.get()
+        dependsOn(extractRequiredDependenciesTask)
+        input.from(compiledDependenciesDir)
+
         outputFile.set(intermediates.resolve("classes.dex"))
+
+        doLast {
+            compiledDependenciesDir.deleteRecursively()
+        }
     }
 
     val compileResources = project.tasks.register("compileResources", CompileResourcesTask::class.java) {
@@ -96,11 +146,8 @@ fun registerTasks(project: Project) {
     project.afterEvaluate {
         val make = project.tasks.register("make", Zip::class.java) {
             group = TASK_GROUP
-            val compileDexTask = compileDex.get()
-            dependsOn(compileDexTask)
 
             val manifestFile = intermediates.resolve("manifest.json")
-
             from(manifestFile)
             doFirst {
                 val (versionCode, _) = extension.getVersionDetails()
@@ -128,14 +175,15 @@ fun registerTasks(project: Project) {
                 )
             }
 
+            val compileDexTask = compileDex.get()
+            dependsOn(compileDexTask)
             from(compileDexTask.outputFile)
 
             if (extension.requiresResources.get()) {
                 dependsOn(compileResources.get())
             }
 
-
-            val flxProvider = project.extensions.getByName("flxProvider") as FlixclusiveProviderExtension
+            val flxProvider = project.extensions.getByName(FLX_PROVIDER_EXTENSION_NAME) as FlixclusiveProviderExtension
             val projectName = flxProvider.providerName.get()
 
             if (!isValidFilename(projectName)) {
@@ -158,10 +206,6 @@ fun registerTasks(project: Project) {
             group = TASK_GROUP
             dependsOn("make")
             dependsOn(":generateUpdaterJson")
-        }
-
-        project.tasks.register("cleanCache", CleanCacheTask::class.java) {
-            group = TASK_GROUP
         }
     }
 }

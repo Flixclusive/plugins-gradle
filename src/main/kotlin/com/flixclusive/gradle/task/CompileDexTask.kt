@@ -77,8 +77,13 @@ abstract class CompileDexTask : DefaultTask() {
             )
 
             val fileStreams =
-                input.map { input -> ClassFileInputs.fromPath(input.toPath()).use { it.entries { _, _ -> true } } }
-                    .toTypedArray()
+                input.map { input ->
+                    val path = input.toPath()
+                    ClassFileInputs.fromPath(path)
+                        .use {
+                            it.entries { _, _ -> true }
+                        }
+                }.toTypedArray()
 
             Arrays.stream(fileStreams).flatMap { it }
                 .use { classesInput ->

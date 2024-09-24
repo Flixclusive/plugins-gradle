@@ -22,7 +22,7 @@ import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
 import java.io.File
 
-abstract class CompileResourcesTask : Exec() {
+internal abstract class CompileResourcesTask : Exec() {
     @get:InputDirectory
     @get:SkipWhenEmpty
     @get:IgnoreEmptyDirectories

@@ -16,24 +16,29 @@
 package com.flixclusive.gradle.configuration
 
 import org.gradle.api.Project
+import org.gradle.api.attributes.Attribute
 
-fun registerConfigurations(project: Project) {
-    val getStubsConfiguration = GetProviderStubsConfigurationProvider()
+internal fun registerConfigurations(project: Project) {
+    with(project) {
+        val fatImplementationProvider = FatImplementationProvider()
 
-    project.configurations.register(getStubsConfiguration.name) {
-        isTransitive = false
-    }
+        configurations.register(fatImplementationProvider.name) {
+            /* Temporary workaround:
+            * https://github.com/JetBrains/compose-multiplatform/issues/1404#issuecomment-1146894731
+            * */
+            attributes {
+                attribute(Attribute.of("ui", String::class.java), "awt")
+            }
 
-    project.afterEvaluate {
-        val configuration = project.configurations.getByName(getStubsConfiguration.name)
-        val dependencies = configuration.dependencies
-
-        require(dependencies.size <= 1) {
-            "Only one '${getStubsConfiguration.name}' dependency should be specified, but ${dependencies.size} were!"
+            isCanBeResolved = true
         }
 
-        for (dependency in dependencies) {
-            getStubsConfiguration.provide(project, dependency)
+        afterEvaluate {
+            val fatImplementation = configurations.getByName(fatImplementationProvider.name)
+
+            fatImplementation.dependencies.forEach { dependency ->
+                fatImplementationProvider.provide(project, dependency)
+            }
         }
     }
 }

@@ -7,7 +7,7 @@ import com.flixclusive.model.provider.ProviderType
 import com.flixclusive.gradle.getFlixclusive
 import org.gradle.api.Project
 
-fun Project.createProviderManifest(): ProviderManifest {
+internal fun Project.createProviderManifest(): ProviderManifest {
     val extension = this.extensions.getFlixclusive()
     val (versionCode, versionName) = extension.getVersionDetails()
 
@@ -25,7 +25,7 @@ fun Project.createProviderManifest(): ProviderManifest {
     )
 }
 
-fun Project.createProviderData(): ProviderData {
+internal fun Project.createProviderData(): ProviderData {
     val extension = extensions.getFlixclusive()
     val (versionCode, versionName) = extension.getVersionDetails()
 

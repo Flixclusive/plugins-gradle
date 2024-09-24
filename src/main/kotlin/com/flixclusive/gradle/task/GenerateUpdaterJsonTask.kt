@@ -26,7 +26,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import java.util.LinkedList
 
-abstract class GenerateUpdaterJsonTask : DefaultTask() {
+internal abstract class GenerateUpdaterJsonTask : DefaultTask() {
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
 
