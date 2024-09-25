@@ -53,7 +53,9 @@ internal fun registerTasks(project: Project) {
     val providerClassFile = intermediates.resolve("providerClass")
 
     val compileRequiredDependencies = project.tasks.register("compileRequiredDependencies", ShadowJar::class.java) {
-        logger.lifecycle("Compiling required dependencies...")
+        doFirst {
+            logger.lifecycle("Compiling required dependencies...")
+        }
 
         group = TASK_GROUP
 
