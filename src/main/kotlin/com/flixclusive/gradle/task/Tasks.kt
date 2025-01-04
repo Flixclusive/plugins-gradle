@@ -181,12 +181,12 @@ internal fun registerTasks(project: Project) {
             dependsOn(compileDexTask)
             from(compileDexTask.outputFile)
 
-            if (extension.requiresResources.get()) {
+            if (extension.requiresResources) {
                 dependsOn(compileResources.get())
             }
 
             val flxProvider = project.extensions.getByName(FLX_PROVIDER_EXTENSION_NAME) as FlixclusiveProviderExtension
-            val projectName = flxProvider.providerName.get()
+            val projectName = flxProvider.providerName
 
             if (!isValidFilename(projectName)) {
                 throw IllegalStateException("Invalid project name: $projectName")

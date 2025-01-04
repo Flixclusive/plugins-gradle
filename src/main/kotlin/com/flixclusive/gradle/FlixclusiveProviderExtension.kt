@@ -26,51 +26,71 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import javax.inject.Inject
 
-internal const val APK_STUBS_DEPRECATED_MESSAGE = "This class is deprecated. See https://github.com/flixclusiveorg/core-stubs for more details."
 const val FLX_PROVIDER_EXTENSION_NAME = "flxProvider"
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 abstract class FlixclusiveProviderExtension @Inject constructor(val project: Project) {
-    /**
-     *
-     * [Author]s of the extension
-     * */
-    val authors: ListProperty<Author> = project.objects.listProperty(Author::class.java)
 
-    private var buildBranch = "builds"
+    var buildBranch = "builds"
 
     var versionMajor = 0
     var versionMinor = 0
     var versionPatch = 0
     var versionBuild = 0
 
-    val repositoryUrl: Property<String> = project.objects.property(String::class.java)
-    val updateUrl: Property<String> = project.objects.property(String::class.java)
-    val buildUrl: Property<String> = project.objects.property(String::class.java)
+    internal var providerClassName: String? = null
+
+    var repositoryUrl: String? = null
+    var updateUrl: String? = null
+    var buildUrl: String? = null
+
+    /**
+     *
+     * [Author]s of the extension
+     * */
+    val authors: ListProperty<Author>
+        = project.objects.listProperty(Author::class.java)
+
+    /**
+     * The **super fucking** unique identifier of the provider.
+     *
+     * **IMPORTANT:** The ID **MUST** be **super unique**.
+     * Providers have no centralized database to track or validate IDs, meaning there is no guarantee that your chosen ID
+     * has not been taken by another developer. This creates the possibility of ID conflicts, which can lead to serious
+     * issues in functionality.
+     *
+     * This id will be used for provider updates, order management, and local storage purposes. Changing IDs on different builds/updates will cause update and backport issues. SO MAKE SURE YOUR ID IS A CONSTANT VALUE!
+     *
+     * **Guideline:** Put in significant effort to create a **VERY VERY UNIQUE ID** to minimize the risk of collisions.
+     *
+     * This ID must adhere to the following constraints:
+     * - It must be at least 8-25 characters long.
+     * - It must contain alphanumeric characters (letters and numbers).
+     * - It can optionally include symbols for additional complexity.
+     *
+     * If the above constraints are not met, the build will *throw* an error, preventing further compilation.
+     */
+    var id: String? = null
 
     /**
      * Changelogs of the provider
      * */
-    val changelog: Property<String> = project.objects.property(String::class.java)
-
-    internal var providerClassName: String? = null
+    var changelog: String? = null
 
     /** The name of the provider. Defaults to the project name - [Project.getName]. */
-    val providerName: Property<String> = project.objects.property(String::class.java)
-        .convention(project.name)
+    var providerName: String = project.name
 
     /** Determines whether the provider is an adult-only provider. Defaults to false. */
-    val adult: Property<Boolean> = project.objects.property(Boolean::class.java)
-        .convention(false)
+    var adult = false
 
     /** The provider's description */
-    val description: Property<String> = project.objects.property(String::class.java)
+    var description: String? = null
     /**
      * If your provider has an icon, put its image url here.
      *
      * This is an optional property.
      * */
-    val iconUrl: Property<String> = project.objects.property(String::class.java)
+    var iconUrl: String? = null
     /**
      * The main language of your provider.
      *
@@ -80,7 +100,8 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
      * - Language("en")
      *      - For specific languages only. NOTE: Use the language's short-hand code.
      */
-    val language: Property<Language> = project.objects.property(Language::class.java)
+    var language: Language = Language(languageCode = "en")
+
     /**
      * The main type that your provider supports.
      *
@@ -90,12 +111,13 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
      * - ProviderType.Movies
      * - ProviderType(customType: String) // i.e., ProviderType("Anime")
      */
-    val providerType: Property<ProviderType> = project.objects.property(ProviderType::class.java)
+    var providerType: ProviderType = ProviderType(type = "Unknown")
+
     /**
      * Toggle this if this provider has its own resources. Defaults to false.
      */
-    val requiresResources: Property<Boolean> = project.objects.property(Boolean::class.java)
-        .convention(false)
+    var requiresResources: Boolean = false
+
     /**
      * The current status of this provider. Defaults to Beta.
      *
@@ -105,20 +127,18 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
      * - Status.Down
      * - Status.Working
      */
-    val status: Property<Status> = project.objects.property(Status::class.java)
-        .convention(Status.Beta)
+    var status: Status = Status.Beta
 
     /**
      *
      * Excludes this provider from the updater, meaning it won't show up for users.
      * Set this if the provider is still on beta. Defaults to false.
      * */
-    val excludeFromUpdaterJson: Property<Boolean> =
-        project.objects.property(Boolean::class.java).convention(false)
+    var excludeFromUpdaterJson: Boolean = false
 
-    @Deprecated(APK_STUBS_DEPRECATED_MESSAGE)
-    val userCache = project.gradle.gradleUserHomeDir
-        .resolve("caches")
+    @Deprecated("This has been deprecated. See https://github.com/flixclusiveorg/core-stubs for more details.")
+    val userCache
+        = project.gradle.gradleUserHomeDir.resolve("caches")
 
     /**
      * Adds an author to the list of authors.
@@ -147,12 +167,11 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
      * @param url The url of the repository.
      */
     fun setRepository(url: String) {
-        url.toValidRepositoryLink()
-            .run {
-                updateUrl.set(getRawLink(filename = "updater.json", branch = buildBranch))
-                buildUrl.set(getRawLink(filename = "%s.flx", branch = buildBranch))
-                repositoryUrl.set(this.url)
-            }
+        with(url.toValidRepositoryLink()) {
+            updateUrl = getRawLink(filename = "updater.json", branch = buildBranch)
+            buildUrl = getRawLink(filename = "%s.flx", branch = buildBranch)
+            repositoryUrl = this@with.url
+        }
     }
 
 

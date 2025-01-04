@@ -93,8 +93,7 @@ internal abstract class DeployWithAdbTask : DefaultTask() {
 
         val providerFile = makeTask.outputs.files.singleFile
         val updaterJson = generateUpdaterJsonTask.outputs.files.singleFile
-        val repositoryUrl = project.extensions.getFlixclusive()
-            .repositoryUrl.orNull
+        val repositoryUrl = project.extensions.getFlixclusive().repositoryUrl
 
         if (repositoryUrl == null) {
             logger.error("Repository URL has not been set. Please set it on the project-level build.gradle.kts file")
@@ -142,10 +141,13 @@ internal abstract class DeployWithAdbTask : DefaultTask() {
     }
 
     companion object {
-        private const val OLD_DEBUG_LOCAL_FILE_PATH = "/sdcard/Android/data/com.flixclusive.debug/files/providers/"
-        private const val OLD_LOCAL_FILE_PATH = "/sdcard/Android/data/com.flixclusive/files/providers/"
+        private const val LOCAL_DEBUG_FILE_PATH_SUFFIX = "com.flixclusive.debug/files/providers/debug"
+        private const val LOCAL_RELEASE_FILE_PATH_SUFFIX = "com.flixclusive/files/providers/debug"
 
-        private const val DEBUG_LOCAL_FILE_PATH = "/storage/emulated/0/Android/data/com.flixclusive.debug/files/providers/"
-        private const val LOCAL_FILE_PATH = "/storage/emulated/0/Android/data/com.flixclusive/files/providers/"
+        private const val OLD_DEBUG_LOCAL_FILE_PATH = "/sdcard/Android/data/$LOCAL_DEBUG_FILE_PATH_SUFFIX"
+        private const val OLD_LOCAL_FILE_PATH = "/sdcard/Android/data/$LOCAL_RELEASE_FILE_PATH_SUFFIX"
+
+        private const val DEBUG_LOCAL_FILE_PATH = "/storage/emulated/0/Android/data/$LOCAL_DEBUG_FILE_PATH_SUFFIX"
+        private const val LOCAL_FILE_PATH = "/storage/emulated/0/Android/data/$LOCAL_RELEASE_FILE_PATH_SUFFIX"
     }
 }

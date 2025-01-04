@@ -15,9 +15,9 @@
 
 package com.flixclusive.gradle.task
 
-import com.flixclusive.model.provider.ProviderData
 import com.flixclusive.gradle.findFlixclusive
-import com.flixclusive.gradle.util.createProviderData
+import com.flixclusive.gradle.util.createProviderMetadata
+import com.flixclusive.model.provider.ProviderMetadata
 import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
 import org.gradle.api.DefaultTask
@@ -32,16 +32,16 @@ internal abstract class GenerateUpdaterJsonTask : DefaultTask() {
 
     @TaskAction
     fun generateUpdaterJson() {
-        val list = LinkedList<ProviderData>()
+        val list = LinkedList<ProviderMetadata>()
 
         for (subproject in project.allprojects) {
             val flixclusive = subproject.extensions.findFlixclusive() ?: continue
 
-            if (flixclusive.excludeFromUpdaterJson.get()) {
+            if (flixclusive.excludeFromUpdaterJson) {
                 continue
             }
 
-            list += subproject.createProviderData()
+            list += subproject.createProviderMetadata()
         }
 
         outputFile.asFile.get().writeText(

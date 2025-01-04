@@ -29,7 +29,7 @@ dependencies {
     implementation("org.ow2.asm:asm:9.4")
     implementation("org.ow2.asm:asm-tree:9.4")
     implementation("com.github.vidstige:jadb:master-SNAPSHOT")
-    implementation("com.github.flixclusiveorg.core-stubs:model-provider:1.0.4")
+    implementation("com.github.flixclusiveorg.core-stubs:model-provider:1.2.3")
 }
 
 gradlePlugin {
@@ -47,7 +47,7 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
 }
 
 group = "com.github.flixclusive"
-version = "1.2.2"
+version = "1.2.3"
 
 publishing {
     repositories {
