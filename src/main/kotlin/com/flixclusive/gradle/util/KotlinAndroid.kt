@@ -6,7 +6,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.withType
 
 internal fun Project.configureAndroid(
-    commonExtension: CommonExtension<*, *, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
         compileSdk = 34
@@ -20,6 +20,7 @@ internal fun Project.configureAndroid(
         }
 
         buildFeatures.buildConfig = true
+        buildFeatures.compose = true
 
         compileOptions {
             isCoreLibraryDesugaringEnabled = true

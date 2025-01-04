@@ -67,8 +67,8 @@ internal fun registerTasks(project: Project) {
             exclude("META-INF/**")
         }
 
-        configurations = listOf(
-            project.configurations.getByName(FAT_IMPLEMENTATION)
+        configurations.addAll(
+            listOf(project.configurations.getByName(FAT_IMPLEMENTATION))
         )
 
         archiveBaseName.set("dependencies")

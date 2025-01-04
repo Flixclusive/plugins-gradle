@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -10,25 +12,23 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
 dependencies {
-    implementation(kotlin("stdlib", kotlin.coreLibrariesVersion))
     compileOnly(gradleApi())
-
     compileOnly("com.google.guava:guava:30.1.1-jre")
     compileOnly("com.android.tools:sdk-common:31.0.0")
-    compileOnly("com.android.tools.build:gradle:8.2.0")
-    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10")
+    compileOnly("org.ow2.asm:asm:9.4")
+    compileOnly("org.ow2.asm:asm-tree:9.4")
+    compileOnly("com.github.vidstige:jadb:master-SNAPSHOT")
 
-    implementation("com.github.johnrengelman:shadow:8.1.0")
-    implementation("org.ow2.asm:asm:9.4")
-    implementation("org.ow2.asm:asm-tree:9.4")
-    implementation("com.github.vidstige:jadb:master-SNAPSHOT")
+    implementation("com.android.tools.build:gradle:8.7.0")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.20")
+    implementation("com.gradleup.shadow:shadow-gradle-plugin:9.0.0-beta4")
     implementation("com.github.flixclusiveorg.core-stubs:model-provider:1.2.3")
 }
 

@@ -29,7 +29,8 @@ abstract class FlixclusiveProvider : Plugin<Project> {
         with(project) {
             with(pluginManager) {
                 apply("com.android.library")
-                apply("com.github.johnrengelman.shadow")
+                apply("org.jetbrains.kotlin.plugin.compose")
+                apply("com.gradleup.shadow")
             }
 
             extensions.create(FLX_PROVIDER_EXTENSION_NAME, FlixclusiveProviderExtension::class.java, project)
