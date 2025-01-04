@@ -185,21 +185,18 @@ internal fun registerTasks(project: Project) {
                 dependsOn(compileResources.get())
             }
 
-            val flxProvider = project.extensions.getByName(FLX_PROVIDER_EXTENSION_NAME) as FlixclusiveProviderExtension
-            val projectName = flxProvider.providerName
-
-            if (!isValidFilename(projectName)) {
-                throw IllegalStateException("Invalid project name: $projectName")
+            if (!isValidFilename(project.name)) {
+                throw IllegalStateException("Invalid project name: $project.name")
             }
 
             isPreserveFileTimestamps = false
-            archiveBaseName.set(projectName)
+            archiveBaseName.set(project.name)
             archiveExtension.set("flx")
             archiveVersion.set("")
-            destinationDirectory.set(project.buildDir)
+            destinationDirectory.set(project.layout.buildDirectory)
 
             doLast {
-                logger.lifecycle("Provider package ${projectName}.flx created at ${outputs.files.singleFile}")
+                logger.lifecycle("Provider package ${project.name}.flx created at ${outputs.files.singleFile}")
             }
         }
 
