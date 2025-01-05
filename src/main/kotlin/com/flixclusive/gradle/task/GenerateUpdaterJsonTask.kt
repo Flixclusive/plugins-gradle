@@ -30,18 +30,50 @@ internal abstract class GenerateUpdaterJsonTask : DefaultTask() {
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
 
+    private data class DuplicateInfo(
+        val originalProvider: String,
+        val duplicateProvider: String,
+        val duplicatedId: String
+    ) {
+        override fun toString(): String {
+            return "- Provider '$duplicateProvider' has same ID '$duplicatedId' as '$originalProvider'"
+        }
+    }
+
     @TaskAction
     fun generateUpdaterJson() {
-        val list = LinkedList<ProviderMetadata>()
+        val list = mutableSetOf<ProviderMetadata>()
+        val idToProvider = mutableMapOf<String, String>()
+        val duplicates = mutableListOf<DuplicateInfo>()
 
         for (subproject in project.allprojects) {
             val flixclusive = subproject.extensions.findFlixclusive() ?: continue
+            if (flixclusive.excludeFromUpdaterJson) continue
 
-            if (flixclusive.excludeFromUpdaterJson) {
-                continue
+            val metadata = subproject.createProviderMetadata()
+
+            if (!idToProvider.contains(metadata.id)) {
+                idToProvider[metadata.id] = subproject.name
+            } else {
+                duplicates.add(
+                    DuplicateInfo(
+                        originalProvider = idToProvider[metadata.id]!!,
+                        duplicateProvider = subproject.name,
+                        duplicatedId = flixclusive.id!!
+                    )
+                )
             }
 
-            list += subproject.createProviderMetadata()
+            list.add(metadata)
+        }
+
+        require(duplicates.isEmpty()) {
+            buildString {
+                appendLine("Found ${duplicates.size} providers with duplicate IDs:")
+                duplicates.forEach {
+                    appendLine(it.toString())
+                }
+            }
         }
 
         outputFile.asFile.get().writeText(

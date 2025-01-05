@@ -1,10 +1,10 @@
 package com.flixclusive.gradle.util
 
-import com.flixclusive.gradle.FlixclusiveProviderExtension
 import com.flixclusive.model.provider.ProviderManifest
 import com.flixclusive.gradle.getFlixclusive
 import com.flixclusive.model.provider.ProviderMetadata
 import org.gradle.api.Project
+import java.security.MessageDigest
 
 internal fun Project.createProviderManifest(): ProviderManifest {
     val extension = this.extensions.getFlixclusive()
@@ -14,7 +14,18 @@ internal fun Project.createProviderManifest(): ProviderManifest {
         "No provider class found, make sure your provider class is annotated with @FlixclusiveProvider"
     }
 
+    validateId(name = name, id = extension.id)
+    validateRepositoryUrl(
+        buildBranch = extension.buildBranch,
+        buildUrl = extension.buildUrl,
+        repositoryUrl = extension.repositoryUrl
+    )
+
     return ProviderManifest(
+        id = generateId(
+            repositoryUrl = extension.repositoryUrl!!,
+            id = extension.id!!
+        ),
         providerClassName = extension.providerClassName!!,
         name = name,
         versionName = versionName,
@@ -28,10 +39,20 @@ internal fun Project.createProviderMetadata(): ProviderMetadata {
     val extension = extensions.getFlixclusive()
     val (versionCode, versionName) = extension.getVersionDetails()
 
-    validateId(name, extension.id)
+    validateId(name = name, id = extension.id)
+    validateRepositoryUrl(
+        buildBranch = extension.buildBranch,
+        buildUrl = extension.buildUrl,
+        repositoryUrl = extension.repositoryUrl
+    )
 
     return ProviderMetadata(
-        buildUrl = extension.buildUrl?.let { String.format(it, name) },
+        id = generateId(
+            repositoryUrl = extension.repositoryUrl!!,
+            id = extension.id!!
+        ),
+        repositoryUrl = extension.repositoryUrl!!,
+        buildUrl = extension.buildUrl!!.let { String.format(it, name) },
         status = extension.status,
         versionName = versionName,
         versionCode = versionCode,
@@ -39,12 +60,10 @@ internal fun Project.createProviderMetadata(): ProviderMetadata {
         adult = extension.adult,
         authors = extension.authors.getOrElse(emptyList()),
         description = extension.description,
-        repositoryUrl = extension.repositoryUrl,
         language = extension.language,
         iconUrl = extension.iconUrl,
         providerType = extension.providerType,
         changelog = extension.changelog,
-        id = extension.id
     )
 }
 
@@ -71,3 +90,33 @@ private fun validateId(name: String, id: String?) {
         """.trimIndent()
     }
 }
+
+private fun validateRepositoryUrl(
+    buildBranch: String,
+    buildUrl: String?,
+    repositoryUrl: String?
+) {
+    require(buildBranch.isNotBlank()) {
+        "No build branch found, make sure you've set buildBranch on the provider's `build.gradle.kts`"
+    }
+
+    require(buildUrl != null) {
+        "No build URL found, make sure you've set buildUrl or `setRepository` on the provider's `build.gradle.kts`"
+    }
+
+    require(repositoryUrl != null) {
+        "No repository URL found, make sure you've set repositoryUrl or `setRepository` on the provider's `build.gradle.kts`"
+    }
+}
+
+private fun generateId(repositoryUrl: String, id: String): String {
+    val dataToHash = listOfNotNull(
+        repositoryUrl,
+        id,
+    ).joinToString("|")
+    val digest = MessageDigest.getInstance("SHA-1")
+    val hashBytes = digest.digest(dataToHash.toByteArray())
+    return hashBytes.toHexString().take(15)
+}
+
+private fun ByteArray.toHexString(): String = joinToString("") { "%02x".format(it) }

@@ -69,6 +69,8 @@ abstract class FlixclusiveProviderExtension @Inject constructor(val project: Pro
      * - It can optionally include symbols for additional complexity.
      *
      * If the above constraints are not met, the build will *throw* an error, preventing further compilation.
+     *
+     * Lastly, IDs are re-hashed during build compilation to increase uniqueness.
      */
     var id: String? = null
 

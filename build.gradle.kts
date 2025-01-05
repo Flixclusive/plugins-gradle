@@ -26,9 +26,9 @@ dependencies {
     compileOnly("org.ow2.asm:asm-tree:9.4")
     compileOnly("com.github.vidstige:jadb:master-SNAPSHOT")
     
-    val agp = "8.7.0"
-    val coreStubs = "1.2.3"
-    val kotlin = "2.0.20"
+    val agp = "8.7.3"
+    val coreStubs = "1.2.4"
+    val kotlin = "2.0.21"
     val shadow = "9.0.0-beta4"
 
     compileOnly("com.android.tools.build:gradle:$agp")
