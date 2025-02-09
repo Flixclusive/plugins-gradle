@@ -18,6 +18,7 @@ package com.flixclusive.gradle.task
 import com.android.build.gradle.BaseExtension
 import com.flixclusive.gradle.getFlixclusive
 import com.flixclusive.gradle.util.buildValidFilename
+import com.flixclusive.model.provider.Repository.Companion.toValidRepositoryLink
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Input
@@ -93,25 +94,25 @@ internal abstract class DeployWithAdbTask : DefaultTask() {
 
         val providerFile = makeTask.outputs.files.singleFile
         val updaterJson = generateUpdaterJsonTask.outputs.files.singleFile
-        val repositoryUrl = project.extensions.getFlixclusive().repositoryUrl
+        val repository = project.extensions.getFlixclusive().repositoryUrl?.toValidRepositoryLink()
 
-        if (repositoryUrl == null) {
+        if (repository == null) {
             logger.error("Repository URL has not been set. Please set it on the project-level build.gradle.kts file")
             return false
         }
 
-        val sanitizedFolderName = buildValidFilename(repositoryUrl)
+        val folderName = "${repository.owner}-${repository.name}"
 
         try {
             device.push(
                 files = listOf(providerFile, updaterJson),
-                sanitizedFolderName = sanitizedFolderName,
+                sanitizedFolderName = folderName,
                 isDebug = isDebug
             )
         } catch (e: JadbException) {
             device.push(
                 files = listOf(providerFile, updaterJson),
-                sanitizedFolderName = sanitizedFolderName,
+                sanitizedFolderName = folderName,
                 isDebug = isDebug,
                 useOldStorage = true
             )
@@ -132,7 +133,7 @@ internal abstract class DeployWithAdbTask : DefaultTask() {
         }
 
         files.forEach { file ->
-            val remoteFilePath = "${initialPath}${sanitizedFolderName}/${file.name}"
+            val remoteFilePath = "${initialPath}/${sanitizedFolderName}/${file.name}"
             push(file, RemoteFile(remoteFilePath))
 
             val fileName = files.first().nameWithoutExtension
