@@ -9,10 +9,12 @@ internal fun Project.configureAndroid(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
-        compileSdk = 34
+        compileSdk = 35
 
         defaultConfig {
             minSdk = 21
+            testOptions.targetSdk = 35
+            testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
             vectorDrawables {
                 useSupportLibrary = true
