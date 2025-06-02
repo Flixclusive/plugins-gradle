@@ -179,7 +179,9 @@ internal fun registerTasks(project: Project) {
 
             val compileDexTask = compileDex.get()
             dependsOn(compileDexTask)
-            from(compileDexTask.outputFile)
+            from(compileDexTask.outputFile.asFile.get().parentFile) {
+                include("classes*.dex")
+            }
 
             if (extension.requiresResources) {
                 dependsOn(compileResources.get())
