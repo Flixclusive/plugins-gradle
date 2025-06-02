@@ -53,7 +53,7 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
 }
 
 group = "com.github.flixclusive"
-version = "1.2.3"
+version = "1.2.6"
 
 publishing {
     repositories {
