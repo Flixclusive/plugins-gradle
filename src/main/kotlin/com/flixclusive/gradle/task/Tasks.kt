@@ -27,6 +27,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import groovy.json.JsonBuilder
 import groovy.json.JsonGenerator
 import org.gradle.api.Project
+import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.AbstractCopyTask
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Zip
@@ -53,11 +54,10 @@ internal fun registerTasks(project: Project) {
     val providerClassFile = intermediates.resolve("providerClass")
 
     val compileRequiredDependencies = project.tasks.register("compileRequiredDependencies", ShadowJar::class.java) {
+        group = TASK_GROUP
         doFirst {
             logger.lifecycle("Compiling required dependencies...")
         }
-
-        group = TASK_GROUP
 
         exclude("*.aar")
         exclude("*.bin")
@@ -122,27 +122,20 @@ internal fun registerTasks(project: Project) {
 
     val compileResources = project.tasks.register("compileResources", CompileResourcesTask::class.java) {
         group = TASK_GROUP
+        doFirst {
+            logger.lifecycle("Compiling required resources...")
+        }
 
         val processManifestTask = project.tasks.getByName("processDebugManifest") as ProcessLibraryManifest
         dependsOn(processManifestTask)
 
         val android = project.extensions.getByName("android") as BaseExtension
-        input.set(android.sourceSets.getByName("main").res.srcDirs.single())
+        val resSrcDirs = android.sourceSets.getByName("main").res.srcDirs
+
+        input.set(resSrcDirs.single())
         manifestFile.set(processManifestTask.manifestOutputFile)
 
         outputFile.set(intermediates.resolve("res.apk"))
-
-        doLast {
-            val resApkFile = outputFile.asFile.get()
-
-            if (resApkFile.exists()) {
-                project.tasks.named("make", AbstractCopyTask::class.java) {
-                    from(project.zipTree(resApkFile)) {
-                        exclude("AndroidManifest.xml")
-                    }
-                }
-            }
-        }
     }
 
     project.afterEvaluate {
@@ -184,7 +177,15 @@ internal fun registerTasks(project: Project) {
             }
 
             if (extension.requiresResources) {
-                dependsOn(compileResources.get())
+                val compileResourcesTask = compileResources.get()
+                dependsOn(compileResourcesTask)
+                val resApkFile = compileResourcesTask.outputFile.asFile.get()
+
+                if (resApkFile.exists()) {
+                    from(project.zipTree(resApkFile)) {
+                        exclude("AndroidManifest.xml")
+                    }
+                }
             }
 
             if (!isValidFilename(project.name)) {
@@ -203,6 +204,7 @@ internal fun registerTasks(project: Project) {
         }
 
         project.tasks.register("package") {
+            group = TASK_GROUP
             dependsOn("make")
             finalizedBy(":generateUpdaterJson")
         }
