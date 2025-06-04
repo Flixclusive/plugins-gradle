@@ -38,7 +38,8 @@ private const val TASK_GROUP = "flixclusive"
 
 internal fun registerTasks(project: Project) {
     val extension = project.extensions.getFlixclusive()
-    val intermediates = project.buildDir.resolve("intermediates")
+    val buildDir = project.layout.buildDirectory.asFile.get()
+    val intermediates = buildDir.resolve("intermediates")
     val compiledDependenciesDir = intermediates.resolve("compiled_dependencies/")
 
     if (project.rootProject.tasks.findByName("generateUpdaterJson") == null) {
@@ -47,7 +48,7 @@ internal fun registerTasks(project: Project) {
 
             outputs.upToDateWhen { false }
 
-            outputFile.set(this.project.buildDir.resolve("updater.json"))
+            outputFile.set(this.project.layout.buildDirectory.asFile.get().resolve("updater.json"))
         }
     }
 
