@@ -146,7 +146,7 @@ internal fun registerTasks(project: Project) {
     }
 
     project.afterEvaluate {
-        val make = project.tasks.register("make", Zip::class.java) {
+        project.tasks.register("make", Zip::class.java) {
             group = TASK_GROUP
 
             val manifestFile = intermediates.resolve("manifest.json")
@@ -202,11 +202,14 @@ internal fun registerTasks(project: Project) {
             }
         }
 
-        project.rootProject.tasks.getByName("generateUpdaterJson").dependsOn(make)
+        project.tasks.register("package") {
+            dependsOn("make")
+            finalizedBy(":generateUpdaterJson")
+        }
+
         project.tasks.register("deployWithAdb", DeployWithAdbTask::class.java) {
             group = TASK_GROUP
-            dependsOn("make")
-            dependsOn(":generateUpdaterJson")
+            dependsOn("package")
         }
     }
 }
